@@ -12,6 +12,9 @@ import DownloadIcon from '@mui/icons-material/Download';
 import CloseIcon from '@mui/icons-material/Close';
 import PdfDownloadTable from './components/Pdf';
 import useDownloadReport from './components/Pdf';
+import { supabase } from './store/index'; // Import your Supabase client
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
+
 
 const makeStyles = (styles) => () => styles;
 
@@ -75,6 +78,7 @@ export default function Bills() {
     const [saveButtonText, setSaveButtonText] = useState('Save');
     const [pdfdownloader, message] = useDownloadReport();
     const [open, setOpen] = useState(false);
+    const navigate = useNavigate(); // Import useNavigate from react-router-dom
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0], // Default to today's date
         id: '',
@@ -111,6 +115,14 @@ export default function Bills() {
         setOpenDialog(true);
         setFields(fields);
         setTitle('Add New Bill');
+    }
+    const handleLogOut = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error('Error logging out:', error.message);
+        } else {
+            navigate('/login') // Redirect to login page
+        }
     }
     const columns = [
         { field: 'id', headerName: 'Bill No', width: 80 },
@@ -160,6 +172,7 @@ export default function Bills() {
                             <Typography variant="h4" style={{ fontWeight: 600 }}>
                                 Bills
                             </Typography>
+                            <Button onClick={() => { handleLogOut() }} variant="contained">Log Out</Button>
 
                         </Box>
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>

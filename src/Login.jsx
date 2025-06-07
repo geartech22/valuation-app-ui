@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     TextField,
@@ -7,10 +7,15 @@ import {
     Checkbox,
     FormControlLabel,
     Link,
+    IconButton,
+    InputAdornment,
+    CircularProgress
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import image from './assets/background.png'; // Import your background image
 import { useNavigate } from 'react-router-dom';
+import { supabase } from './store/index'; // Import your Supabase client
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 
 // Create a custom Material-UI theme to adjust default styles if needed
@@ -74,16 +79,37 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const navigate = useNavigate();
+    const [error, setError] = useState({ message: '', state: false });
+    const [showPassword, setShowPassword] = useState(false)
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = (e) => {
+    const navigate = useNavigate();
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+                navigate('/bills')
+            }
+        }
+
+        checkUser()
+    }, [navigate])
+
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // In a real application, you would handle authentication here.
-        // For this example, we'll just log the values.
-        console.log('Email:', email);
-        console.log('Password:', password);
-        console.log('Remember Me:', rememberMe);
-        // You could add a message box here to provide feedback to the user.
+        setLoading(true);
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
+
+        if (error) {
+            setError({ message: "Incorrect Username or Password", state: true });
+        } else {
+            console.log('Login successful:', data);
+            navigate('/bills')
+        }
+        setLoading(false);
     };
 
     return (
@@ -117,7 +143,7 @@ const Login = () => {
                     }}
                 >
                     <Typography variant="h4" component="h2" sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
-                        Paramount Valuations
+                        Valuations
                     </Typography>
 
                     <form onSubmit={handleLogin}>
@@ -128,20 +154,40 @@ const Login = () => {
                                 placeholder="Enter your email"
                                 type="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    setError({ message: '', state: false });
+                                }}
                                 required
+                                error={error.state}
                             />
                             <TextField
                                 fullWidth
+                                error={error.state}
                                 variant="outlined"
                                 placeholder="Enter your password"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    setError({ message: '', state: false })
+                                }}
                                 required
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={() => setShowPassword((prev) => !prev)}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff sx={{ color: 'white' }} /> : <Visibility sx={{ color: 'white' }} />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
                             />
 
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white', fontSize: '0.875rem' }}>
+                            {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white', fontSize: '0.875rem' }}>
                                 <FormControlLabel
                                     control={
                                         <Checkbox
@@ -161,32 +207,38 @@ const Login = () => {
                                 <Link href="#" underline="hover" sx={{ color: 'white' }}>
                                     Forgot password?
                                 </Link>
+                            </Box> */}
+                            {error.state ? <Typography sx={{ margin: 'auto' }} color='error' >{error.message}</Typography> : ' '}
+                            <Box sx={{ m: 1, position: 'relative' }}>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    disabled={loading}
+                                    sx={{
+                                        width: '100%',
+                                        backgroundColor: 'white',
+                                        color: '#1a202c', // Equivalent to gray-800
+                                        fontWeight: 'bold',
+                                        '&:hover': {
+                                            backgroundColor: '#e2e8f0', // Equivalent to gray-200
+                                        },
+                                    }}
+                                >
+                                    Log In
+                                </Button>
+                                {loading && (<CircularProgress sx={{
+                                    color: 'white',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    marginTop: '-20px',
+                                    marginLeft: '-20px',
+                                }} color="secondary" />)}
                             </Box>
-
-                            <Button
-                                onClick={() => { navigate('/bills') }}
-                                type="submit"
-                                variant="contained"
-                                sx={{
-                                    backgroundColor: 'white',
-                                    color: '#1a202c', // Equivalent to gray-800
-                                    fontWeight: 'bold',
-                                    '&:hover': {
-                                        backgroundColor: '#e2e8f0', // Equivalent to gray-200
-                                    },
-                                }}
-                            >
-                                Log In
-                            </Button>
                         </Box>
                     </form>
 
-                    <Typography variant="body2" sx={{ color: 'white', textAlign: 'center', marginTop: '16px' }}>
-                        Don't have an account?{' '}
-                        <Link href="#" underline="hover" sx={{ color: 'white', fontWeight: 'bold' }}>
-                            Register
-                        </Link>
-                    </Typography>
+
                 </Box>
             </Box>
         </ThemeProvider>
