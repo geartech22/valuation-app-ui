@@ -5,7 +5,7 @@ import { valuationEntries } from './constants/tableData';
 import Navigation from './components/Navigation';
 import { Typography } from './components/Typography';
 import { Alert, Box, Snackbar } from '@mui/material';
-import DynamicFormDialog from './AddBill';
+import DynamicFormDialog from './Addbill';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
