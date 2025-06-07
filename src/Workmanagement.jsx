@@ -5,7 +5,7 @@ import Button from './components/Button';
 import Datagrid from './components/Datagrid';
 import { bankRecords } from './constants/bankData';
 import { Avatar } from "@mui/material";
-import DynamicFormDialog from "./AddBill";
+import DynamicFormDialog from "./Addbill";
 import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
@@ -139,7 +139,7 @@ const Workmanagement = () => {
                                 Add New Entry +
                             </Button>
                         </Box>
-                        <Paper elevation={0} style={{ border: '1px solid #e0e0e0',minWidth: '100%',width:'700px' }}>
+                        <Paper elevation={0} style={{ border: '1px solid #e0e0e0', minWidth: '100%', width: '700px' }}>
                             <Datagrid
                                 rows={bankRecords}
                                 columns={columns}
