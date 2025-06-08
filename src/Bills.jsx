@@ -96,7 +96,6 @@ export default function Bills() {
     }, [])
 
     useEffect(() => {
-        /// wirte a function to fetch banks and set the bankOptions state
         const fetchBanksAndSettle = async () => {
             try {
                 const response = await fetchBanks();
@@ -159,7 +158,7 @@ export default function Bills() {
             const branchOptions = await fetchBranchByBank(selectedBank.id);
             const selectedBranch = branchOptions.data.find(option => option.branch_name === data.branch);
             const newBill = {
-                // bill_key: data.id,
+                bill_key: data.id,
                 date: data.date,
                 property_details: data.address,
                 property_value: data.value,
