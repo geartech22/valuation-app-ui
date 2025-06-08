@@ -2,20 +2,12 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useState } from 'react';
 import { NotoSansRegular } from '../assets/NotoSans-VariableFont_wdth,wght-normal'; // This should be the JS file exported from the font converter
-
+import { pdfFields } from '../constants/bankData';
 const useDownloadReport = () => {
-    const [message, setMessage] = useState({ key: '', message: '' });
 
-    const entryfields = [
-        { field: 'id', headerName: 'Bill No', width: 80 },
-        { field: 'address', headerName: 'Property Details', width: 300 },
-        { field: 'bank', headerName: 'Bank', width: 100 },
-        { field: 'branch', headerName: 'Branch', width: 250 },
-        { field: 'value', headerName: 'Property Value', width: 180 },
-        { field: 'fee', headerName: 'Bill Amount', width: 130 },
-    ];
 
-    const downloadReport = (filename = 'valuation-report.pdf', rows = {}, data = []) => {
+
+    const downloadReport = (filename = 'valuation-report.pdf', rows = {}, data = [], setMessage) => {
         const { status, branch, bank } = rows || {};
         const unpaidRows = data?.filter(row =>
             (status !== "" ? row.status === status : true) &&
@@ -33,14 +25,14 @@ const useDownloadReport = () => {
         if (unpaidRows.length === 0) {
             setMessage({
                 key: 'info',
-                message: 'No unpaid bills found for the selected criteria.'
+                text: 'No unpaid bills found for the selected criteria.'
             });
             return;
         }
 
         autoTable(doc, {
-            head: [entryfields.map(col => col.headerName)],
-            body: unpaidRows.map(row => entryfields.map(col => row[col.field] || '')),
+            head: [pdfFields.map(col => col.headerName)],
+            body: unpaidRows.map(row => pdfFields.map(col => row[col.field] || '')),
             startY: 15,
             margin: { top: 15, left: 10, right: 10 },
             styles: {
@@ -78,11 +70,11 @@ const useDownloadReport = () => {
 
         setMessage({
             key: 'success',
-            message: 'Report downloaded successfully!'
+            text: 'Report downloaded successfully!'
         });
     };
 
-    return [downloadReport, message];
+    return [downloadReport];
 };
 
 export default useDownloadReport;

@@ -106,7 +106,6 @@ const Login = () => {
         if (error) {
             setError({ message: "Incorrect Username or Password", state: true });
         } else {
-            console.log('Login successful:', data);
             navigate('/bills')
         }
         setLoading(false);

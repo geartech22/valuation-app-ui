@@ -2,6 +2,8 @@ import Navigation from "./components/Navigation";
 import Box from '@mui/material/Box';
 import { Typography } from './components/Typography';
 import { Avatar } from "@mui/material";
+import Lottie from 'lottie-react';
+import emptyData from './assets/empty.json';
 const makeStyles = (styles) => () => styles;
 const Paper = ({ children, style, elevation = 1 }) => (
     <div style={{
@@ -52,8 +54,14 @@ const Dashboard = () => {
                             </Typography>
                             <Avatar />
                         </Box>
+
+
                     </Box>
+
                 </Box>
+                <div style={{ position: 'absolute', left: '50%', top: '45%', transform: 'translate(-50%, -50%)', width: '500px', height: '150px' }}>
+                    <Lottie animationData={emptyData} loop={true} />
+                </div>
             </Paper>
         </Box>
     )

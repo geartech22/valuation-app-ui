@@ -36,42 +36,42 @@ export default function DataTable({ rows, columns }) {
 
     return (
         <Box>
-        <DataGrid
-            rows={rows}
-            columns={updatedColumns}
-            initialState={{ pagination: { paginationModel } }}
-            pageSizeOptions={[5, 10]}
-            sx={{
-                border: 0,
-                fontFamily: 'Inter, Roboto, sans-serif',
-                '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#f9fafb',
-                    color: '#1f2937',
-                    fontWeight: 600,
-                    fontSize: 16,
-                    borderBottom: '1px solid #e5e7eb',
-                },
-                '& .MuiDataGrid-columnHeaderTitle': {
-                    fontWeight: '600',
-                    textTransform: 'capitalize',
-                },
-                '& .MuiDataGrid-cell': {
-                    color: '#111827',
-                    fontSize: 14,
-                },
-                '& .MuiDataGrid-row:hover': {
-                    backgroundColor: '#f3f4f6',
-                },
-                '& .MuiDataGrid-footerContainer': {
-                    backgroundColor: '#f9fafb',
-                    borderTop: '1px solid #e5e7eb',
-                },
-                '& .MuiTablePagination-root': {
-                    fontSize: 13,
-                    color: '#4b5563',
-                },
-            }}
-        />
+            <DataGrid
+                rows={rows}
+                columns={updatedColumns}
+                initialState={{ pagination: { paginationModel } }}
+                pageSizeOptions={[10, 15]}
+                sx={{
+                    border: 0,
+                    fontFamily: 'Inter, Roboto, sans-serif',
+                    '& .MuiDataGrid-columnHeaders': {
+                        backgroundColor: '#f9fafb',
+                        color: '#1f2937',
+                        fontWeight: 600,
+                        fontSize: 16,
+                        borderBottom: '1px solid #e5e7eb',
+                    },
+                    '& .MuiDataGrid-columnHeaderTitle': {
+                        fontWeight: '600',
+                        textTransform: 'capitalize',
+                    },
+                    '& .MuiDataGrid-cell': {
+                        color: '#111827',
+                        fontSize: 14,
+                    },
+                    '& .MuiDataGrid-row:hover': {
+                        backgroundColor: '#f3f4f6',
+                    },
+                    '& .MuiDataGrid-footerContainer': {
+                        backgroundColor: '#f9fafb',
+                        borderTop: '1px solid #e5e7eb',
+                    },
+                    '& .MuiTablePagination-root': {
+                        fontSize: 13,
+                        color: '#4b5563',
+                    },
+                }}
+            />
         </Box>
     );
 }

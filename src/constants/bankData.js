@@ -1,82 +1,20 @@
-export const bankRecords = [
-  {
-    id: 1001,
-    address: "Thazhekkode, Malappuram",
-    bank: "Canara Bank",
-    branch: "Perinthalmanna",
-    manager: "Suresh Kumar",
-    employee: "Anand R"
-  },
-  {
-    id: 1002,
-    address: "Kunnamkulam, Thrissur",
-    bank: "SBI",
-    branch: "Kunnamkulam",
-    manager: "Priya Menon",
-    employee: "Ravi K"
-  },
-  {
-    id: 1003,
-    address: "Pattikkad, Thrissur",
-    bank: "SBI / ADB",
-    branch: "Pattikkad",
-    manager: "Ramesh Nair",
-    employee: "Devanand"
-  },
-  {
-    id: 1004,
-    address: "Mulayam, Thrissur",
-    bank: "SBI",
-    branch: "Erumapetty",
-    manager: "Mini Mathew",
-    employee: "Raju Devassy"
-  },
-  {
-    id: 1005,
-    address: "Cheruthuruthi, Thrissur",
-    bank: "Federal Bank",
-    branch: "Cheruthuruthi",
-    manager: "Anitha Rajan",
-    employee: "Ratheesh Kumar"
-  },
-  {
-    id: 1006,
-    address: "Vellinezhi, Palakkad",
-    bank: "South Indian Bank",
-    branch: "Shoranur",
-    manager: "Haridas M",
-    employee: "Vipin R"
-  },
-  {
-    id: 1007,
-    address: "Nelluvai, Thrissur",
-    bank: "Canara Bank",
-    branch: "Wadakkanchery",
-    manager: "Vijaya L",
-    employee: "Samuel A"
-  },
-  {
-    id: 1008,
-    address: "Peringottukurissi, Palakkad",
-    bank: "SBI",
-    branch: "Ottapalam",
-    manager: "Jayakrishnan",
-    employee: "Rajesh MNR"
-  },
-  {
-    id: 1009,
-    address: "Kanjirappally, Kottayam",
-    bank: "Federal Bank",
-    branch: "Kanjirappally",
-    manager: "Revathy S",
-    employee: "Sreehari P.S"
-  },
-  {
-    id: 1010,
-    address: "Valanchery, Malappuram",
-    bank: "HDFC Bank",
-    branch: "Valanchery",
-    manager: "Aswin Kumar",
-    employee: "Anoop"
-  }
+export const entryfields = [
+  { id: 'date', name: 'date', label: 'Date', type: 'date', required: true },
+  { id: 'id', name: 'id', label: 'ID', type: 'number', required: true },
+  { id: 'address', name: 'address', label: 'Address', type: 'text', required: true },
+  { id: 'bank', name: 'bank', label: 'Bank', component: 'autocomplete', options: [], required: true },
+  { id: 'branch', name: 'branch', label: 'Branch', component: 'autocomplete', options: [], required: true },
+  { id: 'value', name: 'value', label: 'Value', type: 'number', required: true },
+  { id: 'fee', name: 'fee', label: 'Fee', type: 'number', required: true },
+  // { id: 'amountInWords', name: 'amountInWords', label: 'Amount in Words' },
+  { id: 'status', name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'], required: true },
+];
+
+export const pdfFields = [
+  { field: 'id', headerName: 'Bill No', width: 80 },
+  { field: 'address', headerName: 'Property Details', width: 300 },
+  { field: 'bank', headerName: 'Bank', width: 100 },
+  { field: 'branch', headerName: 'Branch', width: 250 },
+  { field: 'value', headerName: 'Property Value', width: 180 },
+  { field: 'fee', headerName: 'Bill Amount', width: 130 },
 ];

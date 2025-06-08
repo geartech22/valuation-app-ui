@@ -94,7 +94,7 @@ const ListItemText = ({ primary, style }) => (
 const Icon = ({ name, style }) => {
     const icons = {
         bills: <ReceiptLongIcon />,
-        work: <WorkIcon/>,
+        work: <WorkIcon />,
         dashboard: <DashboardIcon />
     };
 
@@ -106,14 +106,13 @@ const menuItems = [
     { id: 'WorkManagement', label: 'Work Management', icon: 'work' }
 
 ];
-const Navigation = ({selectedItem}) => {
+const Navigation = ({ selectedItem }) => {
     const classes = useStyles();
     const [selectedMenuItem, setSelectedMenuItem] = useState(selectedItem);
     const navigate = useNavigate();
     useEffect(() => {
         setSelectedMenuItem(selectedItem);
     }, [selectedItem]);
-    console.log("selectedItem", selectedItem);
 
 
     return (
@@ -136,7 +135,7 @@ const Navigation = ({selectedItem}) => {
                         selected={selectedMenuItem === (item.id.toLowerCase())}
                         onClick={() => {
                             setSelectedMenuItem(item.id),
-                            navigate(`/${item.id.toLowerCase()}`)
+                                navigate(`/${item.id.toLowerCase()}`)
 
                         }}
                         style={{

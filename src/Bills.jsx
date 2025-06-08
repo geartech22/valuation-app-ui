@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import Datagrid from './components/Datagrid';
 import Button from './components/Button';
-import { valuationEntries } from './constants/tableData';
 import Navigation from './components/Navigation';
 import { Typography } from './components/Typography';
 import { Alert, Box, Snackbar } from '@mui/material';
-import DynamicFormDialog from './Addbill';
+import DynamicFormDialog from './Formdialog';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
 import CloseIcon from '@mui/icons-material/Close';
-import PdfDownloadTable from './components/Pdf';
 import useDownloadReport from './components/Pdf';
 import { supabase } from './store/index'; // Import your Supabase client
 import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
-
+import { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill } from './store/bills'; // Import your fetchBills function
+import { entryfields } from './constants/bankData';
+import Lottie from 'lottie-react';
+import loaderData from './assets/loader.json';
 
 const makeStyles = (styles) => () => styles;
 
@@ -28,20 +29,6 @@ const Paper = ({ children, style, elevation = 1 }) => (
         {children}
     </div>
 );
-const bankOptions = ['Kerala Bank', 'SBI', 'HDFC Bank', 'Federal Bank', 'Canara Bank', 'Axis Bank'];
-const branchOptions = ['Pazhayannur Branch', 'Shoranur Branch', 'Alappuzha Branch', 'Thrikkakara Branch', 'Thrissur Branch'];
-
-const entryfields = [
-    { name: 'date', label: 'Date', type: 'date' },
-    { name: 'id', label: 'ID' },
-    { name: 'address', label: 'Address' },
-    { name: 'bank', label: 'Bank', component: 'autocomplete', options: bankOptions },
-    { name: 'branch', label: 'Branch', component: 'autocomplete', options: branchOptions },
-    { name: 'value', label: 'Value' },
-    { name: 'fee', label: 'Fee' },
-    { name: 'amountInWords', label: 'Amount in Words' },
-    { name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'] },
-];
 
 const useStyles = makeStyles({
 
@@ -70,14 +57,19 @@ const useStyles = makeStyles({
 });
 
 export default function Bills() {
+
+
     const classes = useStyles();
     const [openDialog, setOpenDialog] = useState(false);
     const [fields, setFields] = useState(entryfields);
     const [title, setTitle] = useState('Add New Bill');
-    const [values, setValues] = useState(valuationEntries);
+    const [values, setValues] = useState([]);
     const [saveButtonText, setSaveButtonText] = useState('Save');
-    const [pdfdownloader, message] = useDownloadReport();
+    const [pdfdownloader] = useDownloadReport();
     const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState({ key: '', text: '' });
+    const [isLoading, setIsLoading] = useState(false);
+    const [bankOptions, setBankOptions] = useState([]); // State to hold bank options
     const navigate = useNavigate(); // Import useNavigate from react-router-dom
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0], // Default to today's date
@@ -87,22 +79,117 @@ export default function Bills() {
         branch: '',
         value: '',
         fee: '',
-        amountInWords: '',
         status: 'Unpaid' // Default status
     });
-    const handleDownload = () => {
-        setOpenDialog(true);
-        setFields([
-            { name: 'bank', label: 'Bank', component: 'autocomplete', options: bankOptions },
-            { name: 'branch', label: 'Branch', component: 'autocomplete', options: branchOptions },
-            { name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'] }
-        ]);
+    useEffect(() => {
+        const fetchAndSetBills = async () => {
+            setIsLoading(true);
+            const response = await fetchBills();
+            if (response.status === 'success') {
+                setValues(response.data);
+            } else {
+                console.error('Error fetching bills:', response.message);
+            }
+            setIsLoading(false);
+        };
+        fetchAndSetBills();
+    }, [])
+
+    useEffect(() => {
+        /// wirte a function to fetch banks and set the bankOptions state
+        const fetchBanksAndSettle = async () => {
+            try {
+                const response = await fetchBanks();
+                if (response.status === 'success') {
+                    setBankOptions(response.data);
+                } else {
+                    console.error('Error fetching banks:', response.message);
+                }
+            } catch (error) {
+                console.error('Error fetching banks:', error);
+            }
+        };
+        fetchBanksAndSettle();
+    }, []);
+    useEffect(() => {
+        const fetchAndSetFields = async () => {
+
+            if (title === 'Download Bills') {
+                setFields([
+                    { name: 'bank', label: 'Bank', component: 'autocomplete', options: bankOptions || [] },
+                    { name: 'branch', label: 'Branch', component: 'autocomplete', options: [] },
+                    { name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'] }
+                ]);
+            } else if (title === 'Add New Bill' || title === 'Edit Bill') {
+                setFields(entryfields.map(field =>
+                    field.name === 'bank'
+                        ? { ...field, options: bankOptions || [] }
+                        : field
+                ));
+            }
+        };
+        fetchAndSetFields();
+    }, [title]);
+
+
+
+    const handleDownload = async () => {
         setTitle('Download Bills');
         setSaveButtonText('Download');
+        setOpenDialog(true);
+
     }
-    const handleNewBill = () => {
+    const handleNewBill = async () => {
+        setIsLoading(true);
+        setTitle('Add New Bill');
+        setSaveButtonText('Save');
+        setOpenDialog(true);
+        setIsLoading(false);
+
+    }
+    const handleSubmit = async (data) => {
+        if (title === 'Download Bills') {
+            pdfdownloader(`report-${new Date()
+                .toLocaleString('en-GB')      // "07/06/2025, 14:45:32"
+                .replace(', ', '/')}.pdf`, data, values, setMessage);
+            setOpen(true);
+        }
+        else {
+            const selectedBank = fields.find(field => field.name === 'bank')?.options.find(option => option.name === data.bank);
+            const branchOptions = await fetchBranchByBank(selectedBank.id);
+            const selectedBranch = branchOptions.data.find(option => option.branch_name === data.branch);
+            const newBill = {
+                // bill_key: data.id,
+                date: data.date,
+                property_details: data.address,
+                property_value: data.value,
+                bill_amount: data.fee,
+                status: data.status,
+                bank_id: selectedBank ? selectedBank.id : null,
+                branch_id: selectedBranch ? selectedBranch.id : null
+            };
+            if (title === 'Edit Bill') {
+                const update = await updateBill(data.id, newBill);
+                if (update.status === 'success') {
+                    const getBills = await fetchBills();
+                    if (getBills.status === 'success') {
+                        setValues(getBills.data);
+                    }
+                }
+            }
+            else {
+                const insert = await insertBill(newBill);
+                if (insert.status === 'success') {
+                    const getBills = await fetchBills();
+                    if (getBills.status === 'success') {
+                        setValues(getBills.data);
+                    }
+                }
+            }
+        }
+
         setFormData({
-            date: new Date().toISOString().split('T')[0], // Default to today's date
+            date: new Date().toISOString().split('T')[0], // Reset to today's date
             id: '',
             address: '',
             bank: '',
@@ -110,11 +197,15 @@ export default function Bills() {
             value: '',
             fee: '',
             amountInWords: '',
-            status: 'Unpaid' // Default status
+            status: 'Unpaid' // Reset status
         });
-        setOpenDialog(true);
-        setFields(fields);
-        setTitle('Add New Bill');
+
+        setMessage({
+            key: 'success',
+            text: 'Bill saved successfully!'
+        });
+        setOpen(true);
+
     }
     const handleLogOut = async () => {
         const { error } = await supabase.auth.signOut();
@@ -134,30 +225,36 @@ export default function Bills() {
         { field: 'fee', headerName: 'Bill Amount(₹)', width: 130 },
         { field: 'status', headerName: 'Status', width: 120 },
         {
-            field: 'actions', headerName: 'Edit', width: 100, renderCell: (params) => {
-                const handleEditClick = () => {
-                    setFormData({
-                        date: params.row.date,
-                        id: params.row.id,
-                        address: params.row.address,
-                        bank: params.row.bank,
-                        branch: params.row.branch,
-                        value: params.row.value,
-                        fee: params.row.fee,
-                        amountInWords: params.row.amountInWords,
-                        status: params.row.status
-                    });
-                    setOpenDialog(true);
+            field: 'actions', headerName: 'Edit', width: 100, renderCell: (params) => (
+                <IconButton onClick={() => handleEditClick(params.row)}>
+                    <EditIcon />
+                </IconButton>
+            )
 
-                };
-                return (
-                    <IconButton onClick={handleEditClick}>
-                        <EditIcon />
-                    </IconButton>
-                );
-            }
         }
     ];
+    const handleBankChange = async (key, value) => {
+        if (key === 'bank') {
+            const branchOptions = await fetchBranchByBank(value.id);
+            setFields(prevFields => prevFields.map(field =>
+                field.name === 'branch' ? { ...field, options: branchOptions.data } : field
+            ));
+        }
+    }
+    const handleEditClick = (row) => {
+        setFormData({
+            date: new Date(row.date).toISOString().split('T')[0],
+            id: parseInt(row.id, 10),
+            address: row.address,
+            bank: row.bank,
+            branch: row.branch,
+            value: parseInt(row.value, 10),
+            fee: parseInt(row.fee, 10),
+            status: row.status
+        });
+        setOpenDialog(true);
+        setTitle('Edit Bill');
+    };
 
     return (
         <Box style={classes.mainContainer}>
@@ -166,7 +263,7 @@ export default function Bills() {
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
 
                     <Navigation selectedItem='Bills' />
-                    <Box style={classes.content}>
+                    {!isLoading ? <Box style={classes.content}>
 
                         <Box style={classes.header}>
                             <Typography variant="h4" style={{ fontWeight: 600 }}>
@@ -203,7 +300,7 @@ export default function Bills() {
                             open={open}
                             autoHideDuration={5000}
                             onClose={() => setOpen(false)}
-                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         >
                             <Alert
                                 size="medium"
@@ -229,12 +326,16 @@ export default function Bills() {
                                     </IconButton>
                                 }
                             >
-                                {message?.message}
+                                {message?.text}
                             </Alert>
                         </Snackbar>
-                    </Box>
+
+                    </Box> :
+                        <div style={{ margin: 'auto', width: '150px', height: '150px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                            <Lottie animationData={loaderData} loop={true} />
+                        </div>}
                 </Box>
-            </Paper>
+            </Paper >
             <DynamicFormDialog open={openDialog}
                 onClose={() => {
                     setOpenDialog(false);
@@ -250,28 +351,18 @@ export default function Bills() {
                         status: 'Unpaid' // Reset status
                     });
                 }}
-                fields={fields}
+                formFields={fields} // Fields for the form
                 onSubmit={(data) => {
-                    setOpen(true);
-                    pdfdownloader(`report-${new Date()
-                        .toLocaleString('en-GB')      // "07/06/2025, 14:45:32"
-                        .replace(', ', '/')}.pdf`, data, values);
+                    handleSubmit(data);
                 }}
                 title={title}
                 saveText={saveButtonText}
                 cancelText="Cancel"
-                values={formData || {
-                    date: new Date().toISOString().split('T')[0], // Default to today's date
-                    id: '',
-                    address: '',
-                    bank: '',
-                    branch: '',
-                    value: '',
-                    fee: '',
-                    amountInWords: '',
-                    status: 'Unpaid' // Default status
-                }}
+                values={formData} // Pass the formData state to the dialog
+                onComponentChange={(key, value) => { handleBankChange(key, value) }}
+                disabledKey={'branch'}
+                disabledReference={'bank'}
             />
-        </Box>
+        </Box >
     );
 }
