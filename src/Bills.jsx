@@ -62,7 +62,7 @@ export default function Bills() {
     const classes = useStyles();
     const [openDialog, setOpenDialog] = useState(false);
     const [fields, setFields] = useState(entryfields);
-    const [title, setTitle] = useState('Add New Bill');
+    const [title, setTitle] = useState('');
     const [values, setValues] = useState([]);
     const [saveButtonText, setSaveButtonText] = useState('Save');
     const [pdfdownloader] = useDownloadReport();
@@ -131,7 +131,6 @@ export default function Bills() {
     }, [title]);
 
 
-
     const handleDownload = async () => {
         setTitle('Download Bills');
         setSaveButtonText('Download');
@@ -139,11 +138,9 @@ export default function Bills() {
 
     }
     const handleNewBill = async () => {
-        setIsLoading(true);
         setTitle('Add New Bill');
         setSaveButtonText('Save');
         setOpenDialog(true);
-        setIsLoading(false);
 
     }
     const handleSubmit = async (data) => {
@@ -156,7 +153,8 @@ export default function Bills() {
         else {
             const selectedBank = fields.find(field => field.name === 'bank')?.options.find(option => option.name === data.bank);
             const branchOptions = await fetchBranchByBank(selectedBank.id);
-            const selectedBranch = branchOptions.data.find(option => option.branch_name === data.branch);
+            const selectedBranch = branchOptions?.data.find(option => option.name === data.branch);
+            console.log("selectedBranch", selectedBranch)
             const newBill = {
                 bill_key: data.id,
                 date: data.date,
