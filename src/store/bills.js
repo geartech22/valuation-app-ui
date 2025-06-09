@@ -31,7 +31,7 @@ export const fetchBills = async () => {
         date: new Date(bill.date).toLocaleDateString('en-GB'), // Format date to DD/MM/YYYY
         address: bill.property_details,
         bank: bill.bank ? bill.bank.name : 'N/A',
-        branch: bill.branch ? `${bill.branch.branch_name} (${bill.branch.address})` : 'N/A',
+        branch: bill.branch ? `${bill.branch.branch_name}` : 'N/A',
         value: bill.property_value,
         fee: bill.bill_amount,
         amountInWords: bill.amount_in_words,
@@ -62,7 +62,7 @@ export const fetchBanks = async () => {
 export const fetchBranchByBank = async (bankId) => {
     const { data, error } = await supabase
         .from('branch')
-        .select('id, branch_name, address,created_at,bank_id') // add other fields as needed
+        .select('id, branch_name,created_at,bank_id') // add other fields as needed
         .eq('bank_id', bankId);
 
     if (error) {
