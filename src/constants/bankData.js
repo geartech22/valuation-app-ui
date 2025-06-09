@@ -1,5 +1,5 @@
 export const entryfields = [
-  { id: 'date', name: 'date', label: 'Valuation Date', type: 'date', required: true },
+  { id: 'date', name: 'date', label: 'Bill Date', type: 'date', required: true },
   { id: 'id', name: 'id', label: 'Bill Number', type: 'number', required: true },
   { id: 'address', name: 'address', label: 'Property Details', type: 'text', required: true },
   { id: 'bank', name: 'bank', label: 'Bank', component: 'autocomplete', options: [], required: true },
@@ -7,6 +7,7 @@ export const entryfields = [
   { id: 'value', name: 'value', label: 'Property Value(₹)', type: 'number', required: true },
   { id: 'fee', name: 'fee', label: 'Bill Amount(₹)', type: 'number', required: true },
   { id: 'status', name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'], required: true },
+  { id: 'comments', name: 'comments', label: 'Comments', type: 'text', required: false },
 ];
 
 export const pdfFields = [
@@ -17,3 +18,15 @@ export const pdfFields = [
   { field: 'value', headerName: 'Property Value', width: 180 },
   { field: 'fee', headerName: 'Bill Amount', width: 130 },
 ];
+
+export const valuationFields = [
+  { id: 'id', name: 'id', label: 'Valuation Number', type: 'number', required: true },
+  { id: 'address', name: 'address', label: 'Property Details', type: 'text', required: true },
+  { id: 'bank', name: 'bank', label: 'Bank', component: 'autocomplete', options: [], required: true },
+  { id: 'branch', name: 'branch', label: 'Branch', component: 'autocomplete', options: [], required: true },
+  { id: 'valuation_contact', name: 'valuation_contact', label: 'Valuation Contact', type: 'text', required: true },
+  { id: 'site_investigator', name: 'site_investigator', label: 'Site Investigator', component: 'autocomplete', required: true },
+  { id: 'documented_by', name: 'documented_by', label: 'Documented By', component: 'autocomplete', required: true },
+  { id: 'status', name: 'status', label: 'Status', component: 'autocomplete', options: ['In Progress', 'Dispatched', 'Completed', 'Blocked'], required: true },
+  { id: 'comments', name: 'comments', label: 'Comments', type: 'text', required: false },
+]

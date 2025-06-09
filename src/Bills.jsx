@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Datagrid from './components/Datagrid';
 import Button from './components/Button';
 import Navigation from './components/Navigation';
@@ -79,19 +79,21 @@ export default function Bills() {
         branch: '',
         value: '',
         fee: '',
-        status: 'Unpaid' // Default status
+        status: 'Unpaid',
+        comments: '' // Default status
     });
+    const fetchAndSetBills = async () => {
+        setIsLoading(true);
+        const response = await fetchBills();
+        if (response.status === 'success') {
+            setValues(response.data);
+        } else {
+            console.error('Error fetching bills:', response.message);
+        }
+        setIsLoading(false);
+    };
     useEffect(() => {
-        const fetchAndSetBills = async () => {
-            setIsLoading(true);
-            const response = await fetchBills();
-            if (response.status === 'success') {
-                setValues(response.data);
-            } else {
-                console.error('Error fetching bills:', response.message);
-            }
-            setIsLoading(false);
-        };
+
         fetchAndSetBills();
     }, [])
 
@@ -154,7 +156,6 @@ export default function Bills() {
             const selectedBank = fields.find(field => field.name === 'bank')?.options.find(option => option.name === data.bank);
             const branchOptions = await fetchBranchByBank(selectedBank.id);
             const selectedBranch = branchOptions?.data.find(option => option.name === data.branch);
-            console.log("selectedBranch", selectedBranch)
             const newBill = {
                 bill_key: data.id,
                 date: data.date,
@@ -163,7 +164,8 @@ export default function Bills() {
                 bill_amount: data.fee,
                 status: data.status,
                 bank_id: selectedBank ? selectedBank.id : null,
-                branch_id: selectedBranch ? selectedBranch.id : null
+                branch_id: selectedBranch ? selectedBranch.id : null,
+                comments: data.comments || ''
             };
             if (title === 'Edit Bill') {
                 const update = await updateBill(data.id, newBill);
@@ -193,7 +195,8 @@ export default function Bills() {
             branch: '',
             value: '',
             fee: '',
-            status: 'Unpaid' // Reset status
+            status: 'Unpaid',
+            comments: '' // Reset status
         });
 
         setMessage({
@@ -213,13 +216,14 @@ export default function Bills() {
     }
     const columns = [
         { field: 'id', headerName: 'Bill No', width: 80 },
-        { field: 'date', headerName: 'Valuation Date', width: 150 },
+        { field: 'date', headerName: 'Bill Date', width: 150 },
         { field: 'address', headerName: 'Property Details', width: 300 },
         { field: 'bank', headerName: 'Bank', width: 100 },
         { field: 'branch', headerName: 'Branch', width: 250 },
         { field: 'value', headerName: 'Property Value(₹)', width: 180 },
         { field: 'fee', headerName: 'Bill Amount(₹)', width: 130 },
         { field: 'status', headerName: 'Status', width: 120 },
+        { field: 'comments', headerName: 'Comments', width: 200 },
         {
             field: 'actions', headerName: 'Edit', width: 100, renderCell: (params) => (
                 <IconButton onClick={() => handleEditClick(params.row)}>
@@ -246,7 +250,8 @@ export default function Bills() {
             branch: row.branch,
             value: parseInt(row.value, 10),
             fee: parseInt(row.fee, 10),
-            status: row.status
+            status: row.status,
+            comments: row.comments || ''
         });
         setOpenDialog(true);
         setTitle('Edit Bill');
@@ -289,6 +294,8 @@ export default function Bills() {
                             <Datagrid
                                 rows={values}
                                 columns={columns}
+                                loadData={fetchAndSetBills}
+                                loading={isLoading}
                             />
 
                         </Paper>
@@ -328,7 +335,7 @@ export default function Bills() {
                         </Snackbar>
 
                     </Box> :
-                        <div style={{ margin: 'auto', width: '350px', height: '350px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                        <div style={{ margin: 'auto', width: '250px', height: '250px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                             <Lottie animationData={loaderData} loop={true} />
                         </div>}
                 </Box>
@@ -344,7 +351,8 @@ export default function Bills() {
                         branch: '',
                         value: '',
                         fee: '',
-                        status: 'Unpaid' // Reset status
+                        status: 'Unpaid',
+                        comments: '' // Reset status
                     });
                 }}
                 formFields={fields} // Fields for the form

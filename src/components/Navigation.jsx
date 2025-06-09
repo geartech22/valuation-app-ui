@@ -24,7 +24,8 @@ const useStyles = makeStyles({
         backgroundColor: '#fafafa',
         paddingTop: '20px',
         paddingBottom: '20px',
-        borderRight: '1px solid #e0e0e0'
+        borderRight: '1px solid #e0e0e0',
+        width: '200px',
     },
     logo: {
         display: 'flex',
@@ -103,7 +104,7 @@ const Icon = ({ name, style }) => {
 const menuItems = [
     { id: 'Dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'Bills', label: 'Bills', icon: 'bills' },
-    { id: 'WorkManagement', label: 'Work Management', icon: 'work' }
+    { id: 'Valuations', label: 'Valuations', icon: 'work' }
 
 ];
 const Navigation = ({ selectedItem }) => {

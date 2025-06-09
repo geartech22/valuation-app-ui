@@ -22,7 +22,7 @@ const useDownloadReport = () => {
         doc.addFont('NotoSans-Regular.ttf', 'NotoSans', 'normal');
         doc.setFont('NotoSans');
 
-        if (unpaidRows.length === 0) {
+        if (unpaidRows?.length === 0) {
             setMessage({
                 key: 'info',
                 text: 'No unpaid bills found for the selected criteria.'

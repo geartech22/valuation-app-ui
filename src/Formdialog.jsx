@@ -29,14 +29,15 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
 
     const handleAutocompleteChange = (key) => (e, value) => {
         setFormData((prev) => ({ ...prev, [key]: value?.name ? value.name : value }));
-        onComponentChange(key, value);
+        onComponentChange?.(key, value);
     };
 
     const handleSubmit = () => {
         onSubmit(formData);
         onClose();
     };
-    const isDisabled = Object.values(formData).some(value => (value === '' && title !== "Download Bills"))
+    const isDisabled = title !== "Download Bills" &&
+        formFields.some(field => field.required && !formData[field.name]);
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}
             transitionDuration={300}>
