@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import DynamicFormDialog from "./Formdialog";
 import { supabase } from "./store/index"; // Import supabase client
 import { fetchBanks, fetchBranchByBank } from "./store/bills";
+import MaintenanceBanner from "./components/Maintenence";
 const makeStyles = (styles) => () => styles;
 
 const Paper = ({ children, style, elevation = 1 }) => (
@@ -214,6 +215,8 @@ const Valuations = () => {
                             </Typography>
                             <Button onClick={() => { handleLogOut() }} variant="contained">Log Out</Button>
                         </Box>
+                        <MaintenanceBanner />
+
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
                             <Button variant="contained"
                                 color="primary" onClick={() => {
