@@ -36,7 +36,7 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
         onSubmit(formData);
         onClose();
     };
-    // Check if any value in formData is an empty string
+    const isDisabled = Object.values(formData).some(value => value === null || value === '');
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}
             transitionDuration={300}>
@@ -95,7 +95,7 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
                 </DialogContent>
                 <DialogActions sx={{ marginRight: '2.5%' }}>
                     <Button onClick={onClose} color="inherit">{cancelText || 'Cancel'}</Button>
-                    <Button type="submit" variant="contained">{saveText || 'Save'}</Button>
+                    <Button disabled={isDisabled} type="submit" variant="contained">{saveText || 'Save'}</Button>
                 </DialogActions>
             </form>
         </Dialog>

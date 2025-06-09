@@ -193,7 +193,6 @@ export default function Bills() {
             branch: '',
             value: '',
             fee: '',
-            amountInWords: '',
             status: 'Unpaid' // Reset status
         });
 
@@ -251,6 +250,7 @@ export default function Bills() {
         });
         setOpenDialog(true);
         setTitle('Edit Bill');
+        setSaveButtonText('Save');
     };
 
     return (
@@ -328,7 +328,7 @@ export default function Bills() {
                         </Snackbar>
 
                     </Box> :
-                        <div style={{ margin: 'auto', width: '150px', height: '150px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                        <div style={{ margin: 'auto', width: '350px', height: '350px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                             <Lottie animationData={loaderData} loop={true} />
                         </div>}
                 </Box>
@@ -344,7 +344,6 @@ export default function Bills() {
                         branch: '',
                         value: '',
                         fee: '',
-                        amountInWords: '',
                         status: 'Unpaid' // Reset status
                     });
                 }}

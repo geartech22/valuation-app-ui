@@ -1,12 +1,11 @@
 export const entryfields = [
-  { id: 'date', name: 'date', label: 'Date', type: 'date', required: true },
-  { id: 'id', name: 'id', label: 'ID', type: 'number', required: true },
-  { id: 'address', name: 'address', label: 'Address', type: 'text', required: true },
+  { id: 'date', name: 'date', label: 'Valuation Date', type: 'date', required: true },
+  { id: 'id', name: 'id', label: 'Bill Number', type: 'number', required: true },
+  { id: 'address', name: 'address', label: 'Property Details', type: 'text', required: true },
   { id: 'bank', name: 'bank', label: 'Bank', component: 'autocomplete', options: [], required: true },
   { id: 'branch', name: 'branch', label: 'Branch', component: 'autocomplete', options: [], required: true },
-  { id: 'value', name: 'value', label: 'Value', type: 'number', required: true },
-  { id: 'fee', name: 'fee', label: 'Fee', type: 'number', required: true },
-  // { id: 'amountInWords', name: 'amountInWords', label: 'Amount in Words' },
+  { id: 'value', name: 'value', label: 'Property Value(₹)', type: 'number', required: true },
+  { id: 'fee', name: 'fee', label: 'Bill Amount(₹)', type: 'number', required: true },
   { id: 'status', name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'], required: true },
 ];
 

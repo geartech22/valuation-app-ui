@@ -34,7 +34,6 @@ export const fetchBills = async () => {
         branch: bill.branch ? `${bill.branch.branch_name}` : 'N/A',
         value: bill.property_value,
         fee: bill.bill_amount,
-        amountInWords: bill.amount_in_words,
         status: bill.status
     }));
     return { status: 'success', message: 'Bills fetched successfully', data: formattedData, statusCode: 200 };
