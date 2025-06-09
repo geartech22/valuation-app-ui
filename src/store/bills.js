@@ -18,8 +18,7 @@ export const fetchBills = async () => {
       ),
       branch:branch_id (
         id,
-        branch_name,
-        address
+        branch_name
       )
     `).order('created_at', { ascending: false });
 
@@ -54,7 +53,7 @@ export const insertBill = async (billData) => {
     return { status: 'success', message: 'Bill inserted successfully', data: data, statusCode: 201 };
 };
 export const fetchBanks = async () => {
-    const { data, error } = await supabase.from('bank').select(`id,name,short_code,created_at`)
+    const { data, error } = await supabase.from('bank').select(`id,name,created_at`)
     if (error) {
         return { status: 'error', message: error.message, data: [], statusCode: error.code };
     }
