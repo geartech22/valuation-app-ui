@@ -10,6 +10,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import Logo from "../assets/logo.png";
 
 const makeStyles = (styles) => () => styles;
+const version = __APP_VERSION__;
 
 const List = ({ children, style }) => <div style={style}>{children}</div>;
 const useStyles = makeStyles({
@@ -120,46 +121,57 @@ const Navigation = ({ selectedItem }) => {
 
 
     return (
-        <Box style={classes.sidebar}>
-            <Box style={classes.logo}>
-                <Box
-                    component="img"
-                    src={Logo} // adjust path as needed
-                    alt={Logo}
-                    sx={{
-                        width: 180, // or '100%', 'auto', etc.
-                        height: 'auto',
-                        display: 'block',
-                        mx: 'auto', // center horizontally
-                    }}
-                />
+        <Box style={{ ...classes.sidebar, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100vh' }}>
+            <div>
+                <Box style={classes.logo}>
+                    <Box
+                        component="img"
+                        src={Logo}
+                        alt="Logo"
+                        sx={{
+                            width: 180,
+                            height: 'auto',
+                            display: 'block',
+                            mx: 'auto',
+                        }}
+                    />
+                </Box>
+
+                <List>
+                    {menuItems?.map((item) => (
+                        <ListItem
+                            key={item.id.toLowerCase()}
+                            selected={selectedMenuItem === item.id.toLowerCase()}
+                            onClick={() => {
+                                setSelectedMenuItem(item.id);
+                                navigate(`/${item.id.toLowerCase()}`);
+                            }}
+                            style={{
+                                alignItems: 'normal',
+                                background:
+                                    selectedMenuItem === item.id
+                                        ? 'linear-gradient(90deg, rgb(55, 65, 81) -110.47%, rgba(55, 65, 81, 0) 86.39%)'
+                                        : 'transparent',
+                                borderRight:
+                                    selectedMenuItem === item.id
+                                        ? '3px solid #374151'
+                                        : 'none',
+                                borderRadius: '0px',
+                            }}
+                        >
+                            <ListItemIcon>
+                                <Icon name={item.icon} />
+                            </ListItemIcon>
+                            <ListItemText primary={item.label} />
+                        </ListItem>
+                    ))}
+                </List>
+            </div>
+
+            <Box style={{ padding: '12px 16px', fontSize: '20px' }}>
+                Version {version}
             </Box>
-
-            <List>
-                {menuItems?.map((item) => (
-                    <ListItem
-                        key={item.id.toLowerCase()}
-                        selected={selectedMenuItem === (item.id.toLowerCase())}
-                        onClick={() => {
-                            setSelectedMenuItem(item.id),
-                                navigate(`/${item.id.toLowerCase()}`)
-
-                        }}
-                        style={{
-                            alignItems: 'normal',
-                            background: selectedMenuItem === item.id
-                                ? 'linear-gradient(90deg, rgb(55, 65, 81) -110.47%, rgba(55, 65, 81, 0) 86.39%)'
-                                : 'transparent', borderRight: selectedMenuItem === item.id ? '3px solid #374151' : 'none', borderRadius: '0px'
-                        }}
-                    >
-                        <ListItemIcon>
-                            <Icon name={item.icon} />
-                        </ListItemIcon>
-                        <ListItemText primary={item.label} />
-                    </ListItem>
-                ))}
-            </List>
         </Box>
-    )
+    );
 }
 export default Navigation;
