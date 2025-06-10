@@ -14,8 +14,9 @@ import { valuationFields } from "./constants/bankData";
 import { useNavigate } from "react-router-dom";
 import DynamicFormDialog from "./Formdialog";
 import { supabase } from "./store/index"; // Import supabase client
-import { fetchBanks, fetchBranchByBank } from "./store/bills";
+// import { fetchBanks, fetchBranchByBank } from "./store/useBillStore";
 import MaintenanceBanner from "./components/Maintenence";
+import Header from "./Header";
 const makeStyles = (styles) => () => styles;
 
 const Paper = ({ children, style, elevation = 1 }) => (
@@ -209,12 +210,7 @@ const Valuations = () => {
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
                     <Navigation selectedItem="Valuations" />
                     {!isLoading ? <Box style={classes.content}>
-                        <Box style={classes.header}>
-                            <Typography variant="h4" style={{ fontWeight: 600 }}>
-                                Valuations
-                            </Typography>
-                            <Button onClick={() => { handleLogOut() }} variant="contained">Log Out</Button>
-                        </Box>
+                        <Header name="Valuations" />
                         <MaintenanceBanner />
 
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>

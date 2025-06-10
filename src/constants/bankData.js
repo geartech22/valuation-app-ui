@@ -30,3 +30,9 @@ export const valuationFields = [
   { id: 'status', name: 'status', label: 'Status', component: 'autocomplete', options: ['In Progress', 'Dispatched', 'Completed', 'Blocked'], required: true },
   { id: 'comments', name: 'comments', label: 'Comments', type: 'text', required: false },
 ]
+
+export const downloadFields = [
+  { name: 'bank', label: 'Bank', component: 'autocomplete', options: [] },
+  { name: 'branch', label: 'Branch', component: 'autocomplete', options: [] },
+  { name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'] }
+]

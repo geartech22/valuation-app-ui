@@ -3,7 +3,6 @@ import {
     Card,
     CardContent,
     Avatar,
-    Typography,
     Grid,
     Box,
     Paper,
@@ -12,6 +11,9 @@ import Navigation from './components/Navigation'; // Adjust path as needed
 import DownloadIcon from '@mui/icons-material/Download';
 import Button from './components/Button';// Adjust if you use a different icon
 import MaintenanceBanner from './components/Maintenence';
+import { Typography } from './components/Typography';
+import Header from './Header'; // Adjust path as needed
+
 
 // Dummy handlers and variables for demonstration
 
@@ -217,12 +219,7 @@ const EmployeeGrid = () => {
                     <Navigation selectedItem='Employees' />
                     {!isLoading ? (
                         <Box style={classes.content}>
-                            <Box style={classes.header}>
-                                <Typography variant="h4" style={{ fontWeight: 600 }}>
-                                    Employees
-                                </Typography>
-                                <Button onClick={handleLogOut} variant="contained">Log Out</Button>
-                            </Box>
+                            <Header name="Employees" />
                             <MaintenanceBanner />
 
                             <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
