@@ -10,8 +10,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import Logo from "../assets/logo.png";
 
 const makeStyles = (styles) => () => styles;
-const version = import.meta.env.VITE_VERSION
-console.log("Version:", version);
+const version = __APP_VERSION__;
 
 const List = ({ children, style }) => <div style={style}>{children}</div>;
 const useStyles = makeStyles({
