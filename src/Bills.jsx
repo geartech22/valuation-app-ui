@@ -16,6 +16,7 @@ import { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill } fro
 import { entryfields } from './constants/bankData';
 import Lottie from 'lottie-react';
 import loaderData from './assets/loader.json';
+import MaintenanceBanner from './components/Maintenence';
 
 const makeStyles = (styles) => () => styles;
 
@@ -274,6 +275,8 @@ export default function Bills() {
                             <Button onClick={() => { handleLogOut() }} variant="contained">Log Out</Button>
 
                         </Box>
+                        <MaintenanceBanner title={'Branch Edit Info'} variant='info' subtitle={`Before editing the branch field, please click on the bank first. This will load the correct list of branches. We’re working on improving this in the next update.`} />
+
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
                             <Button onClick={() => handleDownload()}
                                 startIcon={<DownloadIcon />}
