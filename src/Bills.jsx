@@ -225,13 +225,7 @@ export default function Bills() {
                     {!isLoading ? <Box style={classes.content}>
 
                         <Header name="Bills" />
-                        <Box style={classes.header}>
-                            <Typography variant="h4" style={{ fontWeight: 600 }}>
-                                Bills
-                            </Typography>
-                            <Button onClick={() => { handleLogOut() }} variant="contained">Log Out</Button>
 
-                        </Box>
                         <MaintenanceBanner title={'Branch Edit Info'} variant='info' subtitle={`Before editing the branch field, please click on the bank first. This will load the correct list of branches. We’re working on improving this in the next update.`} />
 
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
