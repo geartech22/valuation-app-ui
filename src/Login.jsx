@@ -16,6 +16,7 @@ import image from './assets/background.png'; // Import your background image
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './store/index'; // Import your Supabase client
 import { Visibility, VisibilityOff } from '@mui/icons-material'
+import Logo from "./assets/logo2.png"; // Import your logo if needed
 
 
 // Create a custom Material-UI theme to adjust default styles if needed
@@ -141,9 +142,17 @@ const Login = () => {
                         gap: '24px', // Space between elements
                     }}
                 >
-                    <Typography variant="h4" component="h2" sx={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
-                        Valuations
-                    </Typography>
+                    <Box
+                        component="img"
+                        src={Logo} // adjust path as needed
+                        alt={Logo}
+                        sx={{
+                            width: 300, // or '100%', 'auto', etc.
+                            height: 'auto',
+                            display: 'block',
+                            mx: 'auto', // center horizontally
+                        }}
+                    />
 
                     <form onSubmit={handleLogin}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

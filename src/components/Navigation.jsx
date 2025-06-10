@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import WorkIcon from '@mui/icons-material/Work';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import GroupIcon from '@mui/icons-material/Group';
+import Logo from "../assets/logo.png";
 
 const makeStyles = (styles) => () => styles;
 
@@ -22,10 +24,9 @@ const useStyles = makeStyles({
     },
     sidebar: {
         backgroundColor: '#fafafa',
-        paddingTop: '20px',
         paddingBottom: '20px',
         borderRight: '1px solid #e0e0e0',
-        width: '200px',
+        width: '220px',
     },
     logo: {
         display: 'flex',
@@ -96,7 +97,8 @@ const Icon = ({ name, style }) => {
     const icons = {
         bills: <ReceiptLongIcon />,
         work: <WorkIcon />,
-        dashboard: <DashboardIcon />
+        dashboard: <DashboardIcon />,
+        people: <GroupIcon />
     };
 
     return <span style={{ fontSize: '20px', ...style }}>{icons[name] || name}</span>;
@@ -104,7 +106,8 @@ const Icon = ({ name, style }) => {
 const menuItems = [
     { id: 'Dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'Bills', label: 'Bills', icon: 'bills' },
-    { id: 'Valuations', label: 'Valuations', icon: 'work' }
+    { id: 'Valuations', label: 'Valuations', icon: 'work' },
+    { id: 'Employees', label: 'Employees', icon: 'people' }
 
 ];
 const Navigation = ({ selectedItem }) => {
@@ -119,14 +122,17 @@ const Navigation = ({ selectedItem }) => {
     return (
         <Box style={classes.sidebar}>
             <Box style={classes.logo}>
-                <Box style={classes.logoIcon}>
-                    <Typography variant="h6" style={{ color: 'white', fontWeight: 'bold' }}>
-                        V
-                    </Typography>
-                </Box>
-                <Typography variant="h5" style={{ fontWeight: 600 }}>
-                    Valuation
-                </Typography>
+                <Box
+                    component="img"
+                    src={Logo} // adjust path as needed
+                    alt={Logo}
+                    sx={{
+                        width: 180, // or '100%', 'auto', etc.
+                        height: 'auto',
+                        display: 'block',
+                        mx: 'auto', // center horizontally
+                    }}
+                />
             </Box>
 
             <List>
@@ -140,6 +146,7 @@ const Navigation = ({ selectedItem }) => {
 
                         }}
                         style={{
+                            alignItems: 'normal',
                             background: selectedMenuItem === item.id
                                 ? 'linear-gradient(90deg, rgb(55, 65, 81) -110.47%, rgba(55, 65, 81, 0) 86.39%)'
                                 : 'transparent', borderRight: selectedMenuItem === item.id ? '3px solid #374151' : 'none', borderRadius: '0px'
