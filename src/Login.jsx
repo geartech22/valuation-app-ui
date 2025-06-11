@@ -82,7 +82,6 @@ const Login = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log('Checking session...', user);
         const checkSession = async () => {
             if (user) {
                 navigate('/bills'); // Redirect to the bills page if user is already logged in

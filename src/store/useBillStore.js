@@ -150,6 +150,39 @@ const useBillStore = create((set) => ({
 
         set({ branches: formattedData });
         return { status: 'success', message: 'Branches fetched successfully', data: formattedData, statusCode: 200 };
+    },
+
+    insertBank: async (bankName) => {
+        const { data, error } = await supabase
+            .from('bank')
+            .insert([{ name: bankName }])
+            .select();
+
+        if (error) {
+            set({ error: error.message });
+            return { status: 'error', message: error.message, data: [], statusCode: error.code };
+        }
+
+        // Optionally refresh the bank list
+        await useBillStore.getState().fetchBanks();
+
+        return { status: 'success', message: 'Bank inserted successfully', data: data, statusCode: 201 };
+    },
+    insertBranch: async (branch_name, bank_id) => {
+        const { data, error } = await supabase
+            .from('branch')
+            .insert([{ branch_name: branch_name, bank_id: bank_id }])
+            .select();
+
+        if (error) {
+            set({ error: error.message });
+            return { status: 'error', message: error.message, data: [], statusCode: error.code };
+        }
+
+        // Optionally refresh the branch list
+        await useBillStore.getState().fetchBranchByBank(bank_id);
+
+        return { status: 'success', message: 'Branch inserted successfully', data: data, statusCode: 201 };
     }
 }));
 

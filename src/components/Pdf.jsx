@@ -9,7 +9,6 @@ const useDownloadReport = () => {
 
     const downloadReport = (filename = 'valuation-report.pdf', rows = {}, data = [], setMessage) => {
         const { status, branch, bank } = rows || {};
-        console.log('Download Report:', filename, rows, data);
         const unpaidRows = data?.filter(row =>
             (status !== "" ? row.status === status : true) &&
             (branch.name !== "" ? row.branch === branch.name : true) &&

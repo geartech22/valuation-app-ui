@@ -15,7 +15,7 @@ import Fade from '@mui/material/Fade';
 
 
 
-const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add New Entry", values, saveText, cancelText, onComponentChange, disabledKey, disabledReference }) => {
+const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add New Entry", values, saveText, cancelText, onComponentChange, disabledKey, disabledReference, onNewEntry }) => {
     const [formData, setFormData] = useState(values || []);
     useEffect(() => {
         if (values) {
@@ -38,6 +38,9 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
         onSubmit(formData);
         onClose();
     };
+
+
+    console.log("Form Data:", formData);
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}
             transitionDuration={300}>
@@ -59,10 +62,12 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
                                         required={field.required}
                                         id={field.name}
                                         key={field.id}
+                                        freeSolo={true}
                                         options={field?.options || []}
                                         value={formData[field.name] || null}
                                         onChange={handleAutocompleteChange(field)}
-                                        disabled={(field.name === disabledKey) && formData[disabledReference]?.name === ""}
+                                        onInputChange={handleAutocompleteChange(field)}
+                                        // disabled={(field.name === disabledKey) && formData[disabledReference]?.name === ""}
                                         getOptionLabel={(option) => {
                                             if (typeof option === 'string') return option;
                                             return option?.name || '';

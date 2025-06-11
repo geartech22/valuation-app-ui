@@ -62,7 +62,8 @@ const useStyles = makeStyles({
 
 export default function Bills() {
 
-    const { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill, bills, banks, branches, loading, error, entryFields, downloadFields } = useBillStore(); // Use the custom hook to fetch banks and branches
+    const { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill, bills, banks, branches, loading,
+        error, entryFields, downloadFields, insertBank, insertBranch } = useBillStore(); // Use the custom hook to fetch banks and branches
     const { user, authSession } = useLoginStore(); // Use the custom hook to get user information
     const classes = useStyles();
     const [openDialog, setOpenDialog] = useState(false);
@@ -132,7 +133,6 @@ export default function Bills() {
         setOpenDialog(true);
     }
     const handleSubmit = async (data) => {
-        console.log("Form Data:", data);
         setIsLoading(true);
 
         if (title === 'Download Bills') {
@@ -142,6 +142,16 @@ export default function Bills() {
             setOpen(true);
         }
         else {
+            let bankId, branchId;
+            if (typeof (data.bank) === 'string' && data.bank !== '') {
+                const response = await insertBank(data.bank);
+                bankId = response.data[0].id;
+            }
+            if (typeof (data.branch) === 'string' && data.branch !== '') {
+                const response = await insertBranch(data.branch, bankId ? bankId : data.bank.id);
+                branchId = response.data[0].id;
+            }
+
             const newBill = {
                 bill_key: data.id,
                 date: data.date,
@@ -149,17 +159,15 @@ export default function Bills() {
                 property_value: data.value,
                 bill_amount: data.fee,
                 status: data.status,
-                bank_id: data.bank ? data.bank.id : null,
-                branch_id: data.branch ? data.branch.id : null,
+                bank_id: data?.bank?.id ? data.bank.id : bankId,
+                branch_id: data?.branch?.id ? data.branch.id : branchId,
                 comments: data.comments || ''
             };
             if (title === 'Edit Bill') {
                 await updateBill(data.id, newBill);
-                await fetchBills();
             }
             else {
                 await insertBill(newBill);
-                await fetchBills();
             }
         }
 
@@ -205,7 +213,6 @@ export default function Bills() {
         }
     ];
     const handleBankChange = async (key, value) => {
-        console.log("Key:", key, "Value:", value);
         if ((key === 'bank' && value?.id)) {
             setIsLoading(true);
             const branches = await fetchBranchByBank(value?.id);
@@ -217,7 +224,6 @@ export default function Bills() {
     };
 
     const handleEditClick = async (row) => {
-        console.log("Row Data:", bills);
         setFormData({
             date: new Date(row.date).toISOString().split('T')[0],
             id: parseInt(row.id, 10),
@@ -230,9 +236,7 @@ export default function Bills() {
             comments: row.comments || ''
         });
         setIsLoading(true);
-        console.log("Editing Bill:", row);
         const branches = await fetchBranchByBank(row.bank.id);
-        console.log("Branches:", branches);
         const updatedFields = entryFields.map(field =>
             field.name === 'branch'
                 ? { ...field, options: branches.data }
@@ -244,7 +248,6 @@ export default function Bills() {
         setOpenDialog(true);
         setIsLoading(false);
     };
-    console.log("fields:", fields);
     return (
         <Box style={classes.mainContainer}>
             <Paper style={classes.paper}>
@@ -348,6 +351,7 @@ export default function Bills() {
                 onComponentChange={(key, value) => { handleBankChange(key, value) }}
                 disabledKey={'branch'}
                 disabledReference={'bank'}
+            // onNewEntry={(key, value) => { insertFields(key, value) }}
             />
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 999 }}

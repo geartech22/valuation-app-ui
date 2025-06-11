@@ -174,7 +174,6 @@ const Valuations = () => {
         }
     }
     const handleSubmit = async (data) => {
-        console.log('Form submitted with data:', data);
         const { status, message } = await supabase.from('valuations').insert([{
             valuation_key: data.id,
             address: data.address,
@@ -196,7 +195,6 @@ const Valuations = () => {
         setOpenDialog(false);
     }
     const handleBankChange = async (key, value) => {
-        console.log('Bank changed:', key, value);
         if (key === 'bank') {
             const branchOptions = await fetchBranchByBank(value.id);
             setFields(prevFields => prevFields.map(field =>
