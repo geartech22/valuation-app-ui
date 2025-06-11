@@ -16,7 +16,7 @@ import Fade from '@mui/material/Fade';
 
 
 const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add New Entry", values, saveText, cancelText, onComponentChange, disabledKey, disabledReference }) => {
-    const [formData, setFormData] = useState(values);
+    const [formData, setFormData] = useState(values || []);
     useEffect(() => {
         if (values) {
             setFormData(values);
@@ -28,16 +28,16 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
     };
 
     const handleAutocompleteChange = (key) => (e, value) => {
-        setFormData((prev) => ({ ...prev, [key]: value?.name ? value.name : value }));
-        onComponentChange?.(key, value);
+        console.log("Autocomplete value changed:", key, value);
+        setFormData((prev) => ({ ...prev, [key.id]: value }));
+        onComponentChange?.(key.id, value);
     };
 
     const handleSubmit = () => {
         onSubmit(formData);
         onClose();
     };
-    const isDisabled = title !== "Download Bills" &&
-        formFields.some(field => field.required && !formData[field.name]);
+    console.log("Form Data:", formData);
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}
             transitionDuration={300}>
@@ -52,7 +52,7 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
             }}>
                 <DialogContent>
                     <Stack spacing={2} mt={1}>
-                        {formFields.map((field) => {
+                        {formFields?.map((field) => {
                             if (field.component === 'autocomplete') {
                                 return (
                                     <Autocomplete
@@ -61,7 +61,7 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
                                         key={field.name}
                                         options={field?.options || []}
                                         value={formData[field.name] || null}
-                                        onChange={handleAutocompleteChange(field.name)}
+                                        onChange={handleAutocompleteChange(field)}
                                         disabled={(field.name === disabledKey) && formData[disabledReference] === ""}
                                         getOptionLabel={(option) => {
                                             if (typeof option === 'string') return option;
@@ -96,7 +96,7 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
                 </DialogContent>
                 <DialogActions sx={{ marginRight: '2.5%' }}>
                     <Button onClick={onClose} color="inherit">{cancelText || 'Cancel'}</Button>
-                    <Button disabled={isDisabled} type="submit" variant="contained">{saveText || 'Save'}</Button>
+                    <Button type="submit" variant="contained">{saveText || 'Save'}</Button>
                 </DialogActions>
             </form>
         </Dialog>
