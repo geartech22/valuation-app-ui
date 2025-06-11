@@ -1,20 +1,19 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { Typography } from "./components/Typography"
+import { Typography } from "./components/Typography";
 import Button from "./components/Button";
 import { useNavigate } from 'react-router-dom';
-import { supabase } from './store/index'; // Adjust the import path as needed
+import { useLoginStore } from './store/useLoginStore';
+
 const Header = ({ name }) => {
     const navigate = useNavigate();
+    const { logout, user } = useLoginStore();
 
     const handleLogOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Error logging out:', error.message);
-        } else {
-            navigate('/login') // Redirect to login page
-        }
-    }
+        await logout();
+        navigate('/login');
+    };
+
     return (
         <Box sx={{
             display: 'flex',
@@ -27,6 +26,7 @@ const Header = ({ name }) => {
             </Typography>
             <Button onClick={handleLogOut} variant="contained">Log Out</Button>
         </Box>
-    )
-}
+    );
+};
+
 export default Header;

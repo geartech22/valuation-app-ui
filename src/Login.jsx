@@ -4,9 +4,6 @@ import {
     TextField,
     Button,
     Typography,
-    Checkbox,
-    FormControlLabel,
-    Link,
     IconButton,
     InputAdornment,
     CircularProgress
@@ -14,12 +11,10 @@ import {
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import image from './assets/background.png'; // Import your background image
 import { useNavigate } from 'react-router-dom';
-import { supabase } from './store/index'; // Import your Supabase client
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-import Logo from "./assets/logo2.png"; // Import your logo if needed
+import Logo from "./assets/logo2.png";
+import { useLoginStore } from './store/useLoginStore'; // Import your logo if needed
 
-// Deploy
-// Create a custom Material-UI theme to adjust default styles if needed
 const theme = createTheme({
     typography: {
         fontFamily: 'Inter, sans-serif', // Ensuring the font is Inter
@@ -78,36 +73,42 @@ const theme = createTheme({
 
 const Login = () => {
     const [email, setEmail] = useState('');
+    const { login, logout, user, authSession } = useLoginStore();
     const [password, setPassword] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState({ message: '', state: false });
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+
     useEffect(() => {
-        const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (session) {
-                navigate('/bills')
+        console.log('Checking session...', user);
+        const checkSession = async () => {
+            if (user) {
+                navigate('/bills'); // Redirect to the bills page if user is already logged in
+            }
+            else {
+                const user = await authSession();
+                if (user.data) {
+                    navigate('/bills'); // Redirect to the bills page if user is already logged in
+                }
+                else {
+                    navigate('/login'); // Redirect to login page if no user session
+                }
             }
         }
-
-        checkUser()
-    }, [navigate])
+        checkSession();
+    }, [])
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
-
-        if (error) {
-            setError({ message: "Incorrect Username or Password", state: true });
+        const { status, message } = await login(email, password);
+        if (status === 'error') {
+            setError({ message, state: true });
         } else {
-            navigate('/bills')
+            setError({ message: '', state: false });
+            navigate('/bills'); // Redirect to the bills page on successful login
         }
         setLoading(false);
     };

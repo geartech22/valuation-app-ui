@@ -7,7 +7,7 @@ import { Avatar } from "@mui/material";
 import { useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
-import { fetchPeople, fetchValuations } from "./store/valuations";
+import useValuationsStore from "./store/useValuationStore";
 import Lottie from 'lottie-react';
 import loaderData from './assets/loader.json';
 import { valuationFields } from "./constants/bankData";
@@ -58,6 +58,7 @@ const useStyles = makeStyles({
 });
 
 const Valuations = () => {
+    const { fetchValuations, fetchBanks, fetchBranchByBank, fetchPeople } = useValuationsStore();
     const [values, setValues] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);

@@ -17,6 +17,7 @@ import Header from './Header';
 import useBillStore from './store/useBillStore';
 
 import MaintenanceBanner from './components/Maintenence';
+import { useLoginStore } from './store/useLoginStore';
 
 const makeStyles = (styles) => () => styles;
 
@@ -60,6 +61,7 @@ const useStyles = makeStyles({
 export default function Bills() {
 
     const { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill, bills, banks, branches, loading, error, entryFields, downloadFields } = useBillStore(); // Use the custom hook to fetch banks and branches
+    const { user, authSession } = useLoginStore(); // Use the custom hook to get user information
     const classes = useStyles();
     const [openDialog, setOpenDialog] = useState(false);
     const [fields, setFields] = useState();
@@ -81,8 +83,22 @@ export default function Bills() {
         status: 'Unpaid',
         comments: '' // Default status
     });
-
     useEffect(() => {
+        const checkSession = async () => {
+            if (user) {
+                navigate('/bills'); // Redirect to the bills page if user is already logged in
+            }
+            else {
+                const user = await authSession();
+                if (user?.data) {
+                    navigate('/bills'); // Redirect to the bills page if user is already logged in
+                }
+                else {
+                    navigate('/login'); // Redirect to the login page if no user is found
+                }
+            }
+        }
+        checkSession();
         fetchBanks()
         fetchBills()
     }, []);
