@@ -154,22 +154,12 @@ export default function Bills() {
                 comments: data.comments || ''
             };
             if (title === 'Edit Bill') {
-                const update = await updateBill(data.id, newBill);
-                if (update.status === 'success') {
-                    const getBills = await fetchBills();
-                    if (getBills.status === 'success') {
-                        setValues(getBills.data);
-                    }
-                }
+                await updateBill(data.id, newBill);
+                await fetchBills();
             }
             else {
-                const insert = await insertBill(newBill);
-                if (insert.status === 'success') {
-                    const getBills = await fetchBills();
-                    if (getBills.status === 'success') {
-                        setValues(getBills.data);
-                    }
-                }
+                await insertBill(newBill);
+                await fetchBills();
             }
         }
 
@@ -190,26 +180,28 @@ export default function Bills() {
             text: 'Bill saved successfully!'
         });
         setOpen(true);
-
     }
 
     const columns = [
-        { field: 'id', headerName: 'Bill No', width: 80 },
-        { field: 'date', headerName: 'Bill Date', width: 150 },
-        { field: 'address', headerName: 'Property Details', width: 300 },
-        { field: 'bank', headerName: 'Bank', width: 100 },
-        { field: 'branch', headerName: 'Branch', width: 250 },
-        { field: 'value', headerName: 'Property Value(₹)', width: 180 },
-        { field: 'fee', headerName: 'Bill Amount(₹)', width: 130 },
-        { field: 'status', headerName: 'Status', width: 120 },
-        { field: 'comments', headerName: 'Comments', width: 200 },
+        { field: 'id', headerName: 'Bill No', width: 80, dataType: 'string' },
+        { field: 'date', headerName: 'Bill Date', width: 150, dataType: 'string' },
+        { field: 'address', headerName: 'Property Details', width: 300, dataType: 'string' },
+        { field: 'bank', headerName: 'Bank', width: 100, dataType: 'object', type: 'dropdown' },
+        { field: 'branch', headerName: 'Branch', width: 250, dataType: 'object', type: 'dropdown' },
+        { field: 'value', headerName: 'Property Value(₹)', width: 180, dataType: 'string' },
+        { field: 'fee', headerName: 'Bill Amount(₹)', width: 130, dataType: 'string' },
+        { field: 'status', headerName: 'Status', width: 120, dataType: 'string', type: 'chip' },
+        { field: 'comments', headerName: 'Comments', width: 200, dataType: 'string' },
         {
-            field: 'actions', headerName: 'Edit', width: 100, renderCell: (params) => (
+            field: 'actions',
+            headerName: 'Edit',
+            width: 100,
+            dataType: 'string',
+            renderCell: (params) => (
                 <IconButton onClick={() => handleEditClick(params.row)}>
                     <EditIcon />
                 </IconButton>
             )
-
         }
     ];
     const handleBankChange = async (key, value) => {
@@ -241,15 +233,18 @@ export default function Bills() {
         console.log("Editing Bill:", row);
         const branches = await fetchBranchByBank(row.bank.id);
         console.log("Branches:", branches);
-        setFields(prevFields => prevFields.map(field =>
-            field.name === 'branch' ? { ...field, options: branches.data } : field
-        ));
-        setIsLoading(false);
+        const updatedFields = entryFields.map(field =>
+            field.name === 'branch'
+                ? { ...field, options: branches.data }
+                : { ...field } // force full clone to ensure re-render
+        );
+        setFields(updatedFields);
         setTitle('Edit Bill');
         setSaveButtonText('Save');
         setOpenDialog(true);
-
+        setIsLoading(false);
     };
+    console.log("fields:", fields);
     return (
         <Box style={classes.mainContainer}>
             <Paper style={classes.paper}>

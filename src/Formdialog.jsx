@@ -29,9 +29,7 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
 
     const handleAutocompleteChange = (key) => (e, value) => {
         console.log("Autocomplete value changed:", key, value);
-        if (key.id === "bank") {
-            setFormData((prev) => ({ ...prev, [key.id]: value, "branch": { name: "", id: "" } }));
-        }
+
         setFormData((prev) => ({ ...prev, [key.id]: value }));
         onComponentChange?.(key.id, value);
     };
