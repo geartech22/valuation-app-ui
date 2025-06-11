@@ -29,6 +29,9 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
 
     const handleAutocompleteChange = (key) => (e, value) => {
         console.log("Autocomplete value changed:", key, value);
+        if (key.id === "bank") {
+            setFormData((prev) => ({ ...prev, [key.id]: value, "branch": { name: "", id: "" } }));
+        }
         setFormData((prev) => ({ ...prev, [key.id]: value }));
         onComponentChange?.(key.id, value);
     };
@@ -37,7 +40,6 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
         onSubmit(formData);
         onClose();
     };
-    console.log("Form Data:", formData);
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}
             transitionDuration={300}>
@@ -58,11 +60,11 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
                                     <Autocomplete
                                         required={field.required}
                                         id={field.name}
-                                        key={field.name}
+                                        key={field.id}
                                         options={field?.options || []}
                                         value={formData[field.name] || null}
                                         onChange={handleAutocompleteChange(field)}
-                                        disabled={(field.name === disabledKey) && formData[disabledReference] === ""}
+                                        disabled={(field.name === disabledKey) && formData[disabledReference]?.name === ""}
                                         getOptionLabel={(option) => {
                                             if (typeof option === 'string') return option;
                                             return option?.name || '';

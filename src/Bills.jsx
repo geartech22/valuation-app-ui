@@ -15,6 +15,8 @@ import Lottie from 'lottie-react';
 import loaderData from './assets/loader.json';
 import Header from './Header';
 import useBillStore from './store/useBillStore';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import MaintenanceBanner from './components/Maintenence';
 import { useLoginStore } from './store/useLoginStore';
@@ -83,24 +85,28 @@ export default function Bills() {
         status: 'Unpaid',
         comments: '' // Default status
     });
-    useEffect(() => {
-        const checkSession = async () => {
-            if (user) {
+    const checkSession = async () => {
+        if (user) {
+            navigate('/bills'); // Redirect to the bills page if user is already logged in
+        }
+        else {
+            const user = await authSession();
+            if (user?.data) {
                 navigate('/bills'); // Redirect to the bills page if user is already logged in
             }
             else {
-                const user = await authSession();
-                if (user?.data) {
-                    navigate('/bills'); // Redirect to the bills page if user is already logged in
-                }
-                else {
-                    navigate('/login'); // Redirect to the login page if no user is found
-                }
+                navigate('/login'); // Redirect to the login page if no user is found
             }
         }
+    }
+    useEffect(() => {
         checkSession();
-        fetchBanks()
-        fetchBills()
+        if (bills.length === 0) {
+            fetchBills();
+        }
+        if (banks.length === 0) {
+            fetchBanks();
+        }
     }, []);
     useEffect(() => {
         if (title === 'Edit Bill' || title === 'Add New Bill') {
@@ -127,6 +133,7 @@ export default function Bills() {
     }
     const handleSubmit = async (data) => {
         console.log("Form Data:", data);
+        setIsLoading(true);
 
         if (title === 'Download Bills') {
             pdfdownloader(`report-${new Date()
@@ -177,7 +184,7 @@ export default function Bills() {
             status: 'Unpaid',
             comments: '' // Reset status
         });
-
+        setIsLoading(false);
         setMessage({
             key: 'success',
             text: 'Bill saved successfully!'
@@ -206,14 +213,19 @@ export default function Bills() {
         }
     ];
     const handleBankChange = async (key, value) => {
-        if (key === 'bank') {
-            await fetchBranchByBank(value?.id);
+        console.log("Key:", key, "Value:", value);
+        if ((key === 'bank' && value?.id)) {
+            setIsLoading(true);
+            const branches = await fetchBranchByBank(value?.id);
             setFields(prevFields => prevFields.map(field =>
-                field.name === 'branch' ? { ...field, options: branches } : field
+                field.name === 'branch' ? { ...field, options: branches.data } : field
             ));
+            setIsLoading(false);
         }
-    }
-    const handleEditClick = (row) => {
+    };
+
+    const handleEditClick = async (row) => {
+        console.log("Row Data:", bills);
         setFormData({
             date: new Date(row.date).toISOString().split('T')[0],
             id: parseInt(row.id, 10),
@@ -225,12 +237,19 @@ export default function Bills() {
             status: row.status,
             comments: row.comments || ''
         });
+        setIsLoading(true);
+        console.log("Editing Bill:", row);
+        const branches = await fetchBranchByBank(row.bank.id);
+        console.log("Branches:", branches);
+        setFields(prevFields => prevFields.map(field =>
+            field.name === 'branch' ? { ...field, options: branches.data } : field
+        ));
+        setIsLoading(false);
         setTitle('Edit Bill');
         setSaveButtonText('Save');
         setOpenDialog(true);
 
     };
-
     return (
         <Box style={classes.mainContainer}>
             <Paper style={classes.paper}>
@@ -238,7 +257,7 @@ export default function Bills() {
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
 
                     <Navigation selectedItem='Bills' />
-                    {!isLoading ? <Box style={classes.content}>
+                    <Box style={classes.content}>
 
                         <Header name="Bills" />
 
@@ -304,10 +323,7 @@ export default function Bills() {
                             </Alert>
                         </Snackbar>
 
-                    </Box> :
-                        <div style={{ margin: 'auto', width: '250px', height: '250px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                            <Lottie animationData={loaderData} loop={true} />
-                        </div>}
+                    </Box>
                 </Box>
             </Paper >
             <DynamicFormDialog open={openDialog}
@@ -338,6 +354,12 @@ export default function Bills() {
                 disabledKey={'branch'}
                 disabledReference={'bank'}
             />
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 999 }}
+                open={isLoading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </Box >
     );
 }

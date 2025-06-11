@@ -32,7 +32,7 @@ export const valuationFields = [
 ]
 
 export const downloadFields = [
-  { name: 'bank', label: 'Bank', component: 'autocomplete', options: [] },
-  { name: 'branch', label: 'Branch', component: 'autocomplete', options: [] },
-  { name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'] }
+  { id: 'bank', name: 'bank', label: 'Bank', component: 'autocomplete', options: [] },
+  { id: 'branch', name: 'branch', label: 'Branch', component: 'autocomplete', options: [] },
+  { id: 'status', name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'] }
 ]
