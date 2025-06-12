@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Datagrid from './components/Datagrid';
 import Button from './components/Button';
 import Navigation from './components/Navigation';
-import { Typography } from './components/Typography';
 import { Alert, Box, Snackbar } from '@mui/material';
 import DynamicFormDialog from './Formdialog';
 import EditIcon from '@mui/icons-material/Edit';
@@ -11,14 +10,11 @@ import DownloadIcon from '@mui/icons-material/Download';
 import CloseIcon from '@mui/icons-material/Close';
 import useDownloadReport from './components/Pdf';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
-import Lottie from 'lottie-react';
-import loaderData from './assets/loader.json';
 import Header from './Header';
 import useBillStore from './store/useBillStore';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
-
-import MaintenanceBanner from './components/Maintenence';
+import MaintenanceBanner from './components/Banners';
 import { useLoginStore } from './store/useLoginStore';
 
 const makeStyles = (styles) => () => styles;
@@ -259,8 +255,31 @@ export default function Bills() {
 
                         <Header name="Bills" />
 
-                        <MaintenanceBanner title={'Branch Edit Info'} variant='info' subtitle={`Before editing the branch field, please click on the bank first. This will load the correct list of branches. We’re working on improving this in the next update.`} />
-
+                        <MaintenanceBanner
+                            bannerArray={[
+                                {
+                                    variant: 'info',
+                                    title: 'Branch Edit Info',
+                                    subtitle: 'Before editing the branch field, please click on the bank first. This will load the correct list of branches. We’re working on improving this in the next update.',
+                                    rotate: true,
+                                    duration: 10000
+                                },
+                                {
+                                    variant: 'info',
+                                    title: 'Crash Notice',
+                                    subtitle: 'In case of any issues, Please reload the page. Our expert team is working on it.',
+                                    rotate: true,
+                                    duration: 10000
+                                },
+                                {
+                                    variant: 'info',
+                                    title: 'Beta Version Notice',
+                                    subtitle: 'This appliaction is still in beta. You may experience some bugs or issues.',
+                                    rotate: true,
+                                    duration: 10000
+                                }
+                            ]}
+                        />
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
                             <Button onClick={() => handleDownload()}
                                 startIcon={<DownloadIcon />}

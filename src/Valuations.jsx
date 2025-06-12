@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import DynamicFormDialog from "./Formdialog";
 import { supabase } from "./store/index"; // Import supabase client
 // import { fetchBanks, fetchBranchByBank } from "./store/useBillStore";
-import MaintenanceBanner from "./components/Maintenence";
+import MaintenanceBanner from "./components/Banners";
 import Header from "./Header";
 const makeStyles = (styles) => () => styles;
 
@@ -210,7 +210,17 @@ const Valuations = () => {
                     <Navigation selectedItem="Valuations" />
                     {!isLoading ? <Box style={classes.content}>
                         <Header name="Valuations" />
-                        <MaintenanceBanner />
+                        <MaintenanceBanner
+                            bannerArray={[
+                                {
+                                    variant: 'maintenance',
+                                    title: 'Maintenance Mode',
+                                    subtitle: 'This page is still under development. The data shown here is for demonstration purposes only.',
+                                    rotate: true,
+                                    duration: 10000
+                                }
+                            ]}
+                        />
 
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
                             <Button variant="contained"

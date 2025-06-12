@@ -10,7 +10,7 @@ import {
 import Navigation from './components/Navigation'; // Adjust path as needed
 import DownloadIcon from '@mui/icons-material/Download';
 import Button from './components/Button';// Adjust if you use a different icon
-import MaintenanceBanner from './components/Maintenence';
+import MaintenanceBanner from './components/Banners';
 import { Typography } from './components/Typography';
 import Header from './Header'; // Adjust path as needed
 
@@ -220,7 +220,17 @@ const EmployeeGrid = () => {
                     {!isLoading ? (
                         <Box style={classes.content}>
                             <Header name="Employees" />
-                            <MaintenanceBanner />
+                            <MaintenanceBanner
+                                bannerArray={[
+                                    {
+                                        variant: 'maintenance',
+                                        title: 'Maintenance Mode',
+                                        subtitle: 'This page is still under development. The data shown here is for demonstration purposes only.',
+                                        rotate: true,
+                                        duration: 10000
+                                    }
+                                ]}
+                            />
 
                             <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
                                 <Button
