@@ -3,7 +3,7 @@ import Datagrid from './components/Datagrid';
 import Button from './components/Button';
 import Navigation from './components/Navigation';
 import { Alert, Box, Snackbar } from '@mui/material';
-import DynamicFormDialog from './Formdialog';
+import DynamicFormDialog from './components/Formdialog';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';

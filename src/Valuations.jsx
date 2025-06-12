@@ -12,11 +12,12 @@ import Lottie from 'lottie-react';
 import loaderData from './assets/loader.json';
 import { valuationFields } from "./constants/bankData";
 import { useNavigate } from "react-router-dom";
-import DynamicFormDialog from "./Formdialog";
+import DynamicFormDialog from "./components/Formdialog";
 import { supabase } from "./store/index"; // Import supabase client
 // import { fetchBanks, fetchBranchByBank } from "./store/useBillStore";
 import MaintenanceBanner from "./components/Banners";
 import Header from "./Header";
+import useBillStore from "./store/useBillStore";
 const makeStyles = (styles) => () => styles;
 
 const Paper = ({ children, style, elevation = 1 }) => (
@@ -58,7 +59,8 @@ const useStyles = makeStyles({
 });
 
 const Valuations = () => {
-    const { fetchValuations, fetchBanks, fetchBranchByBank, fetchPeople } = useValuationsStore();
+    const { fetchValuations, fetchPeople } = useValuationsStore();
+    const { fetchBanks, fetchBranchByBank } = useBillStore(); // Import the store functions
     const [values, setValues] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
