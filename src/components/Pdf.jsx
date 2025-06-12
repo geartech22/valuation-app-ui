@@ -12,7 +12,8 @@ const useDownloadReport = () => {
         const unpaidRows = data?.filter(row =>
             (status !== "" ? row.status === status : true) &&
             (branch.name !== "" ? row.branch === branch.name : true) &&
-            (bank.name !== "" ? row.bank === bank.name : true)
+            (branch.name !== "" ? row.branch.name === branch.name : true) &&
+            (bank.name !== "" ? row.bank.name === bank.name : true)
         );
 
         const doc = new jsPDF();
@@ -32,7 +33,7 @@ const useDownloadReport = () => {
 
         autoTable(doc, {
             head: [pdfFields.map(col => col.headerName)],
-            body: unpaidRows.map(row => pdfFields.map(col => row[col.field] || '')),
+            body: unpaidRows.map(row => pdfFields.map(col => row[col.field].name ? row[col.field].name : row[col.field])),
             startY: 15,
             margin: { top: 15, left: 10, right: 10 },
             styles: {

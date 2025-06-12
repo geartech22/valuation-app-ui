@@ -165,8 +165,11 @@ export default function Bills() {
             else {
                 await insertBill(newBill);
             }
+            setMessage({
+                key: 'success',
+                text: 'Bill saved successfully!'
+            });
         }
-
         setFormData({
             date: new Date().toISOString().split('T')[0], // Reset to today's date
             id: '',
@@ -179,10 +182,6 @@ export default function Bills() {
             comments: '' // Reset status
         });
         setIsLoading(false);
-        setMessage({
-            key: 'success',
-            text: 'Bill saved successfully!'
-        });
         setOpen(true);
     }
 
