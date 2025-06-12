@@ -165,6 +165,7 @@ const useBillStore = create((set) => ({
 
         // Optionally refresh the bank list
         await useBillStore.getState().fetchBanks();
+
         return { status: 'success', message: 'Bank inserted successfully', data: data, statusCode: 201 };
     },
     insertBranch: async (branch_name, bank_id) => {

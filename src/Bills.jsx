@@ -142,6 +142,7 @@ export default function Bills() {
             if (typeof (data.bank) === 'string' && data.bank !== '') {
                 const response = await insertBank(data.bank);
                 bankId = response.data[0].id;
+                await fetchBanks(); // Refresh banks after inserting a new bank
             }
             if (typeof (data.branch) === 'string' && data.branch !== '') {
                 const response = await insertBranch(data.branch, bankId ? bankId : data.bank.id);
