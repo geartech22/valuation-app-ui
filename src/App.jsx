@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './ErrorBoundary';
 
 import Bills from './Bills';
@@ -6,7 +6,6 @@ import Login from './Login';
 import Dashboard from './Dashboard';
 import Valuations from './Valuations';
 import EmployeeGrid from './Employee';
-import ErrorPage from './Error';
 
 export default function App() {
   return (
@@ -19,8 +18,8 @@ export default function App() {
           <Route path="/valuations" element={<Valuations />} />
           <Route path="/employees" element={<EmployeeGrid />} />
 
-          {/* Catch-all route for 404 */}
-          <Route path="*" element={<ErrorPage />} />
+          {/* Redirect all unknown routes to /login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
