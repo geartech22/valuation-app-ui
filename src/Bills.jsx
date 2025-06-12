@@ -3,7 +3,7 @@ import Datagrid from './components/Datagrid';
 import Button from './components/Button';
 import Navigation from './components/Navigation';
 import { Alert, Box, Snackbar } from '@mui/material';
-import DynamicFormDialog from './Formdialog';
+import DynamicFormDialog from './components/Formdialog';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -166,8 +166,11 @@ export default function Bills() {
             else {
                 await insertBill(newBill);
             }
+            setMessage({
+                key: 'success',
+                text: 'Bill saved successfully!'
+            });
         }
-
         setFormData({
             date: new Date().toISOString().split('T')[0], // Reset to today's date
             id: '',
@@ -180,10 +183,6 @@ export default function Bills() {
             comments: '' // Reset status
         });
         setIsLoading(false);
-        setMessage({
-            key: 'success',
-            text: 'Bill saved successfully!'
-        });
         setOpen(true);
     }
 

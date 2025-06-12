@@ -164,6 +164,7 @@ const useBillStore = create((set) => ({
         }
 
         // Optionally refresh the bank list
+        await useBillStore.getState().fetchBanks();
 
         return { status: 'success', message: 'Bank inserted successfully', data: data, statusCode: 201 };
     },
@@ -179,8 +180,6 @@ const useBillStore = create((set) => ({
         }
 
         // Optionally refresh the branch list
-        await useBillStore.getState().fetchBranchByBank(bank_id);
-
         return { status: 'success', message: 'Branch inserted successfully', data: data, statusCode: 201 };
     }
 }));

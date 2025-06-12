@@ -169,7 +169,7 @@ const Navigation = ({ selectedItem }) => {
             </div>
 
             <Box style={{ padding: '12px 16px', fontSize: '20px' }}>
-                Version {version}
+                Version <strong>{(version)}</strong>
             </Box>
         </Box>
     );

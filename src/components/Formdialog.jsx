@@ -8,7 +8,7 @@ import {
     Autocomplete,
     Stack,
 } from '@mui/material';
-import Button from "./components/Button";
+import Button from "./Button";
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 import Fade from '@mui/material/Fade';
@@ -24,13 +24,22 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
     }, [values]);
 
     const handleChange = (key) => (e) => {
-        setFormData({ ...formData, [key]: e.target.value });
+        const value = e.target.value;
+        if (key === 'bank' || key === 'branch') {
+            setFormData({ ...formData, [key]: value.toUpperCase() });
+        }
+        else {
+            setFormData((prev) => ({ ...prev, [key]: value }));
+        }
     };
 
     const handleAutocompleteChange = (key) => (e, value) => {
-        console.log("Autocomplete value changed:", key, value);
-
-        setFormData((prev) => ({ ...prev, [key.id]: value }));
+        if (key === 'bank' || key === 'branch') {
+            setFormData({ ...formData, [key.id]: typeof (value) === 'string' ? value.toUpperCase() : value });
+        }
+        else {
+            setFormData((prev) => ({ ...prev, [key.id]: value }));
+        }
         onComponentChange?.(key.id, value);
     };
 
@@ -39,8 +48,6 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
         onClose();
     };
 
-
-    console.log("Form Data:", formData);
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}
             transitionDuration={300}>

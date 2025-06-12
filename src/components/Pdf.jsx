@@ -9,10 +9,11 @@ const useDownloadReport = () => {
 
     const downloadReport = (filename = 'valuation-report.pdf', rows = {}, data = [], setMessage) => {
         const { status, branch, bank } = rows || {};
+        console.log("rowd", status, branch)
         const unpaidRows = data?.filter(row =>
-            (status !== "" ? row.status === status : true) &&
-            (branch.name !== "" ? row.branch === branch.name : true) &&
-            (bank.name !== "" ? row.bank === bank.name : true)
+            (status ? row?.status === status : true) &&
+            (branch?.name ? row?.branch?.name === branch.name : true) &&
+            (bank?.name ? row?.bank?.name === bank.name : true)
         );
 
         const doc = new jsPDF();
@@ -25,14 +26,14 @@ const useDownloadReport = () => {
         if (unpaidRows?.length === 0) {
             setMessage({
                 key: 'info',
-                text: 'No unpaid bills found for the selected criteria.'
+                text: 'No data to download for the selection.'
             });
             return;
         }
 
         autoTable(doc, {
             head: [pdfFields.map(col => col.headerName)],
-            body: unpaidRows.map(row => pdfFields.map(col => row[col.field] || '')),
+            body: unpaidRows.map(row => pdfFields.map(col => row[col.field].name ? row[col.field].name : row[col.field])),
             startY: 15,
             margin: { top: 15, left: 10, right: 10 },
             styles: {

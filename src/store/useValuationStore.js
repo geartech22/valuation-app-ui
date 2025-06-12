@@ -51,11 +51,11 @@ const useValuationsStore = create((set) => ({
         const formattedData = data.map((valuation) => ({
             id: valuation.valuation_key,
             address: valuation.address,
-            bank: valuation.bank?.name || 'N/A',
-            branch: valuation.branch?.branch_name || 'N/A',
-            valuation_contact: valuation.valuation_contact?.name || 'N/A',
-            site_investigator: valuation.site_investigator?.name || 'N/A',
-            documented_by: valuation.documented_by?.name || 'N/A',
+            bank: { id: valuation.bank?.id || '', name: valuation.bank?.name || 'N/A' },
+            branch: { id: valuation.branch?.id || '', name: valuation.branch?.branch_name || 'N/A' },
+            valuation_contact: { id: valuation.valuation_contact?.id || '', name: valuation.valuation_contact?.name || 'N/A' },
+            site_investigator: { id: valuation.site_investigator?.id || '', name: valuation.site_investigator?.name || 'N/A' },
+            documented_by: { id: valuation.documented_by?.id || '', name: valuation.documented_by?.name || 'N/A' },
             status: valuation.status,
             comments: valuation.comments,
             created_at: new Date(valuation.created_at).toLocaleDateString('en-GB')
@@ -68,7 +68,7 @@ const useValuationsStore = create((set) => ({
     // Insert new valuation
     insertValuation: async (valuationData) => {
         const { data, error } = await supabase
-            .from('valuation')
+            .from('valuations')
             .insert([valuationData])
             .select();
 
@@ -84,7 +84,7 @@ const useValuationsStore = create((set) => ({
     // Update existing valuation
     updateValuation: async (valuationKey, updatedFields) => {
         const { data, error } = await supabase
-            .from('valuation')
+            .from('valuations')
             .update(updatedFields)
             .eq('valuation_key', valuationKey)
             .select();
@@ -105,12 +105,28 @@ const useValuationsStore = create((set) => ({
             .select('id, name, role');
 
         if (error) {
+            set({ people: [], error: error.message, loading: false });
+            return { status: 'error', message: error.message, data: [], statusCode: error.code };
+        }
+
+        set({ people: data, status: 'success', loading: false });
+        return { status: 'success', message: 'People fetched successfully', data, statusCode: 200 };
+    },
+    insertPeople: async (peopleData) => {
+        // complete the code\
+        const { data, error } = await supabase
+            .from('people')
+            .insert([peopleData])
+            .select();
+
+        if (error) {
             set({ error: error.message });
             return { status: 'error', message: error.message, data: [], statusCode: error.code };
         }
 
-        set({ people: data });
-        return { status: 'success', message: 'People fetched successfully', data, statusCode: 200 };
+        return { status: 'success', message: 'Valuation inserted successfully', data, statusCode: 201 };
+
+
     }
 }));
 

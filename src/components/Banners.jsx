@@ -111,7 +111,12 @@ export default function MaintenanceBanner({ bannerArray = [] }) {
                         bgcolor: 'transparent',
                         color: content.color,
                         fontWeight: 500,
-                        pr: 6
+                        pr: 6,
+                        fill: content.color,
+                        '& .MuiAlert-icon': {
+                            color: content.color,
+                            marginRight: 1
+                        }
                     }}
                     action={
                         <IconButton

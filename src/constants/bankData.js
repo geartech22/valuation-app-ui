@@ -24,9 +24,9 @@ export const valuationFields = [
   { id: 'address', name: 'address', label: 'Property Details', type: 'text', required: true },
   { id: 'bank', name: 'bank', label: 'Bank', component: 'autocomplete', options: [], required: true },
   { id: 'branch', name: 'branch', label: 'Branch', component: 'autocomplete', options: [], required: true },
-  { id: 'valuation_contact', name: 'valuation_contact', label: 'Valuation Contact', type: 'text', required: true },
-  { id: 'site_investigator', name: 'site_investigator', label: 'Site Investigator', component: 'autocomplete', required: true },
-  { id: 'documented_by', name: 'documented_by', label: 'Documented By', component: 'autocomplete', required: true },
+  { id: 'valuation_contact', name: 'valuation_contact', label: 'Valuation Contact', component: 'autocomplete', type: 'text', required: true, options: [] },
+  { id: 'site_investigator', name: 'site_investigator', label: 'Site Investigator', component: 'autocomplete', required: true, options: [] },
+  { id: 'documented_by', name: 'documented_by', label: 'Documented By', component: 'autocomplete', required: true, options: [] },
   { id: 'status', name: 'status', label: 'Status', component: 'autocomplete', options: ['In Progress', 'Dispatched', 'Completed', 'Blocked'], required: true },
   { id: 'comments', name: 'comments', label: 'Comments', type: 'text', required: false },
 ]
