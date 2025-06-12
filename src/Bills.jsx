@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Datagrid from './components/Datagrid';
 import Button from './components/Button';
 import Navigation from './components/Navigation';
-import { Typography } from './components/Typography';
 import { Alert, Box, Snackbar } from '@mui/material';
 import DynamicFormDialog from './Formdialog';
 import EditIcon from '@mui/icons-material/Edit';
@@ -10,13 +9,13 @@ import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
 import CloseIcon from '@mui/icons-material/Close';
 import useDownloadReport from './components/Pdf';
-import { supabase } from './store/index'; // Import your Supabase client
 import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
-import { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill } from './store/bills'; // Import your fetchBills function
-import { entryfields } from './constants/bankData';
-import Lottie from 'lottie-react';
-import loaderData from './assets/loader.json';
-import MaintenanceBanner from './components/Maintenence';
+import Header from './Header';
+import useBillStore from './store/useBillStore';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+import MaintenanceBanner from './components/Banners';
+import { useLoginStore } from './store/useLoginStore';
 
 const makeStyles = (styles) => () => styles;
 
@@ -59,79 +58,63 @@ const useStyles = makeStyles({
 
 export default function Bills() {
 
-
+    const { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill, bills, banks, branches, loading,
+        error, entryFields, downloadFields, insertBank, insertBranch } = useBillStore(); // Use the custom hook to fetch banks and branches
+    const { user, authSession } = useLoginStore(); // Use the custom hook to get user information
     const classes = useStyles();
     const [openDialog, setOpenDialog] = useState(false);
-    const [fields, setFields] = useState(entryfields);
+    const [fields, setFields] = useState();
     const [title, setTitle] = useState('');
-    const [values, setValues] = useState([]);
     const [saveButtonText, setSaveButtonText] = useState('Save');
     const [pdfdownloader] = useDownloadReport();
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState({ key: '', text: '' });
-    const [isLoading, setIsLoading] = useState(false);
-    const [bankOptions, setBankOptions] = useState([]); // State to hold bank options
+    const [isLoading, setIsLoading] = useState(loading);
     const navigate = useNavigate(); // Import useNavigate from react-router-dom
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0], // Default to today's date
         id: '',
         address: '',
-        bank: '',
-        branch: '',
+        bank: { name: '', id: '' }, // Default bank object
+        branch: { name: '', id: '' }, // Default branch object
         value: '',
         fee: '',
         status: 'Unpaid',
         comments: '' // Default status
     });
-    const fetchAndSetBills = async () => {
-        setIsLoading(true);
-        const response = await fetchBills();
-        if (response.status === 'success') {
-            setValues(response.data);
-        } else {
-            console.error('Error fetching bills:', response.message);
+    const checkSession = async () => {
+        if (user) {
+            navigate('/bills'); // Redirect to the bills page if user is already logged in
         }
-        setIsLoading(false);
-    };
-    useEffect(() => {
-
-        fetchAndSetBills();
-    }, [])
-
-    useEffect(() => {
-        const fetchBanksAndSettle = async () => {
-            try {
-                const response = await fetchBanks();
-                if (response.status === 'success') {
-                    setBankOptions(response.data);
-                } else {
-                    console.error('Error fetching banks:', response.message);
-                }
-            } catch (error) {
-                console.error('Error fetching banks:', error);
+        else {
+            const user = await authSession();
+            if (user?.data) {
+                navigate('/bills'); // Redirect to the bills page if user is already logged in
             }
-        };
-        fetchBanksAndSettle();
+            else {
+                navigate('/login'); // Redirect to the login page if no user is found
+            }
+        }
+    }
+    useEffect(() => {
+        checkSession();
+        if (bills.length === 0) {
+            fetchBills();
+        }
+        if (banks.length === 0) {
+            fetchBanks();
+        }
     }, []);
     useEffect(() => {
-        const fetchAndSetFields = async () => {
+        if (title === 'Edit Bill' || title === 'Add New Bill') {
+            setFields(entryFields);
 
-            if (title === 'Download Bills') {
-                setFields([
-                    { name: 'bank', label: 'Bank', component: 'autocomplete', options: bankOptions || [] },
-                    { name: 'branch', label: 'Branch', component: 'autocomplete', options: [] },
-                    { name: 'status', label: 'Status', component: 'autocomplete', options: ['Paid', 'Unpaid'] }
-                ]);
-            } else if (title === 'Add New Bill' || title === 'Edit Bill') {
-                setFields(entryfields.map(field =>
-                    field.name === 'bank'
-                        ? { ...field, options: bankOptions || [] }
-                        : field
-                ));
-            }
-        };
-        fetchAndSetFields();
-    }, [title]);
+        }
+        else if (title === 'Download Bills') {
+            setFields(downloadFields);
+
+        }
+    }, [title])
 
 
     const handleDownload = async () => {
@@ -140,23 +123,31 @@ export default function Bills() {
         setOpenDialog(true);
 
     }
-    const handleNewBill = async () => {
+    const handleNewBill = () => {
         setTitle('Add New Bill');
         setSaveButtonText('Save');
         setOpenDialog(true);
-
     }
     const handleSubmit = async (data) => {
+        setIsLoading(true);
+
         if (title === 'Download Bills') {
             pdfdownloader(`report-${new Date()
                 .toLocaleString('en-GB')      // "07/06/2025, 14:45:32"
-                .replace(', ', '/')}.pdf`, data, values, setMessage);
+                .replace(', ', '/')}.pdf`, data, bills, setMessage);
             setOpen(true);
         }
         else {
-            const selectedBank = fields.find(field => field.name === 'bank')?.options.find(option => option.name === data.bank);
-            const branchOptions = await fetchBranchByBank(selectedBank.id);
-            const selectedBranch = branchOptions?.data.find(option => option.name === data.branch);
+            let bankId, branchId;
+            if (typeof (data.bank) === 'string' && data.bank !== '') {
+                const response = await insertBank(data.bank);
+                bankId = response.data[0].id;
+            }
+            if (typeof (data.branch) === 'string' && data.branch !== '') {
+                const response = await insertBranch(data.branch, bankId ? bankId : data.bank.id);
+                branchId = response.data[0].id;
+            }
+
             const newBill = {
                 bill_key: data.id,
                 date: data.date,
@@ -164,27 +155,15 @@ export default function Bills() {
                 property_value: data.value,
                 bill_amount: data.fee,
                 status: data.status,
-                bank_id: selectedBank ? selectedBank.id : null,
-                branch_id: selectedBranch ? selectedBranch.id : null,
+                bank_id: data?.bank?.id ? data.bank.id : bankId,
+                branch_id: data?.branch?.id ? data.branch.id : branchId,
                 comments: data.comments || ''
             };
             if (title === 'Edit Bill') {
-                const update = await updateBill(data.id, newBill);
-                if (update.status === 'success') {
-                    const getBills = await fetchBills();
-                    if (getBills.status === 'success') {
-                        setValues(getBills.data);
-                    }
-                }
+                await updateBill(data.id, newBill);
             }
             else {
-                const insert = await insertBill(newBill);
-                if (insert.status === 'success') {
-                    const getBills = await fetchBills();
-                    if (getBills.status === 'success') {
-                        setValues(getBills.data);
-                    }
-                }
+                await insertBill(newBill);
             }
         }
 
@@ -192,57 +171,55 @@ export default function Bills() {
             date: new Date().toISOString().split('T')[0], // Reset to today's date
             id: '',
             address: '',
-            bank: '',
-            branch: '',
+            bank: { name: '', id: '' }, // Reset bank and branch
+            branch: { name: '', id: '' }, // Reset bank and branch
             value: '',
             fee: '',
             status: 'Unpaid',
             comments: '' // Reset status
         });
-
+        setIsLoading(false);
         setMessage({
             key: 'success',
             text: 'Bill saved successfully!'
         });
         setOpen(true);
+    }
 
-    }
-    const handleLogOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Error logging out:', error.message);
-        } else {
-            navigate('/login') // Redirect to login page
-        }
-    }
     const columns = [
-        { field: 'id', headerName: 'Bill No', width: 80 },
-        { field: 'date', headerName: 'Bill Date', width: 150 },
-        { field: 'address', headerName: 'Property Details', width: 300 },
-        { field: 'bank', headerName: 'Bank', width: 100 },
-        { field: 'branch', headerName: 'Branch', width: 250 },
-        { field: 'value', headerName: 'Property Value(₹)', width: 180 },
-        { field: 'fee', headerName: 'Bill Amount(₹)', width: 130 },
-        { field: 'status', headerName: 'Status', width: 120 },
-        { field: 'comments', headerName: 'Comments', width: 200 },
+        { field: 'id', headerName: 'Bill No', width: 80, dataType: 'string' },
+        { field: 'date', headerName: 'Bill Date', width: 150, dataType: 'string' },
+        { field: 'address', headerName: 'Property Details', width: 300, dataType: 'string' },
+        { field: 'bank', headerName: 'Bank', width: 100, dataType: 'object', type: 'dropdown' },
+        { field: 'branch', headerName: 'Branch', width: 250, dataType: 'object', type: 'dropdown' },
+        { field: 'value', headerName: 'Property Value(₹)', width: 180, dataType: 'string' },
+        { field: 'fee', headerName: 'Bill Amount(₹)', width: 130, dataType: 'string' },
+        { field: 'status', headerName: 'Status', width: 120, dataType: 'string', type: 'chip' },
+        { field: 'comments', headerName: 'Comments', width: 200, dataType: 'string' },
         {
-            field: 'actions', headerName: 'Edit', width: 100, renderCell: (params) => (
+            field: 'actions',
+            headerName: 'Edit',
+            width: 100,
+            dataType: 'string',
+            renderCell: (params) => (
                 <IconButton onClick={() => handleEditClick(params.row)}>
                     <EditIcon />
                 </IconButton>
             )
-
         }
     ];
     const handleBankChange = async (key, value) => {
-        if (key === 'bank') {
-            const branchOptions = await fetchBranchByBank(value.id);
+        if ((key === 'bank' && value?.id)) {
+            setIsLoading(true);
+            const branches = await fetchBranchByBank(value?.id);
             setFields(prevFields => prevFields.map(field =>
-                field.name === 'branch' ? { ...field, options: branchOptions.data } : field
+                field.name === 'branch' ? { ...field, options: branches.data } : field
             ));
+            setIsLoading(false);
         }
-    }
-    const handleEditClick = (row) => {
+    };
+
+    const handleEditClick = async (row) => {
         setFormData({
             date: new Date(row.date).toISOString().split('T')[0],
             id: parseInt(row.id, 10),
@@ -254,11 +231,19 @@ export default function Bills() {
             status: row.status,
             comments: row.comments || ''
         });
-        setOpenDialog(true);
+        setIsLoading(true);
+        const branches = await fetchBranchByBank(row.bank.id);
+        const updatedFields = entryFields.map(field =>
+            field.name === 'branch'
+                ? { ...field, options: branches.data }
+                : { ...field } // force full clone to ensure re-render
+        );
+        setFields(updatedFields);
         setTitle('Edit Bill');
         setSaveButtonText('Save');
+        setOpenDialog(true);
+        setIsLoading(false);
     };
-
     return (
         <Box style={classes.mainContainer}>
             <Paper style={classes.paper}>
@@ -266,17 +251,35 @@ export default function Bills() {
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
 
                     <Navigation selectedItem='Bills' />
-                    {!isLoading ? <Box style={classes.content}>
+                    <Box style={classes.content}>
 
-                        <Box style={classes.header}>
-                            <Typography variant="h4" style={{ fontWeight: 600 }}>
-                                Bills
-                            </Typography>
-                            <Button onClick={() => { handleLogOut() }} variant="contained">Log Out</Button>
+                        <Header name="Bills" />
 
-                        </Box>
-                        <MaintenanceBanner title={'Branch Edit Info'} variant='info' subtitle={`Before editing the branch field, please click on the bank first. This will load the correct list of branches. We’re working on improving this in the next update.`} />
-
+                        <MaintenanceBanner
+                            bannerArray={[
+                                {
+                                    variant: 'info',
+                                    title: 'Branch Edit Info',
+                                    subtitle: 'Before editing the branch field, please click on the bank first. This will load the correct list of branches. We’re working on improving this in the next update.',
+                                    rotate: true,
+                                    duration: 10000
+                                },
+                                {
+                                    variant: 'info',
+                                    title: 'Crash Notice',
+                                    subtitle: 'In case of any issues, Please reload the page. Our expert team is working on it.',
+                                    rotate: true,
+                                    duration: 10000
+                                },
+                                {
+                                    variant: 'info',
+                                    title: 'Beta Version Notice',
+                                    subtitle: 'This appliaction is still in beta. You may experience some bugs or issues.',
+                                    rotate: true,
+                                    duration: 10000
+                                }
+                            ]}
+                        />
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
                             <Button onClick={() => handleDownload()}
                                 startIcon={<DownloadIcon />}
@@ -295,10 +298,10 @@ export default function Bills() {
                         <Paper elevation={0} style={{ border: '1px solid #e0e0e0', minWidth: '100%', width: '700px' }}>
 
                             <Datagrid
-                                rows={values}
+                                rows={bills}
                                 columns={columns}
-                                loadData={fetchAndSetBills}
-                                loading={isLoading}
+                                loadData={fetchBills}
+                                loading={loading}
                             />
 
                         </Paper>
@@ -337,26 +340,24 @@ export default function Bills() {
                             </Alert>
                         </Snackbar>
 
-                    </Box> :
-                        <div style={{ margin: 'auto', width: '250px', height: '250px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                            <Lottie animationData={loaderData} loop={true} />
-                        </div>}
+                    </Box>
                 </Box>
             </Paper >
             <DynamicFormDialog open={openDialog}
                 onClose={() => {
-                    setOpenDialog(false);
                     setFormData({
                         date: new Date().toISOString().split('T')[0], // Reset to today's date
                         id: '',
                         address: '',
-                        bank: '',
-                        branch: '',
+                        bank: { name: '', id: '' }, // Reset bank and branch
+                        branch: { name: '', id: '' }, // Reset bank and branch
                         value: '',
                         fee: '',
                         status: 'Unpaid',
                         comments: '' // Reset status
                     });
+                    setOpenDialog(false);
+
                 }}
                 formFields={fields} // Fields for the form
                 onSubmit={(data) => {
@@ -369,7 +370,14 @@ export default function Bills() {
                 onComponentChange={(key, value) => { handleBankChange(key, value) }}
                 disabledKey={'branch'}
                 disabledReference={'bank'}
+            // onNewEntry={(key, value) => { insertFields(key, value) }}
             />
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 999 }}
+                open={isLoading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </Box >
     );
 }

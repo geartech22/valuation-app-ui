@@ -7,15 +7,16 @@ import { Avatar } from "@mui/material";
 import { useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
-import { fetchPeople, fetchValuations } from "./store/valuations";
+import useValuationsStore from "./store/useValuationStore";
 import Lottie from 'lottie-react';
 import loaderData from './assets/loader.json';
 import { valuationFields } from "./constants/bankData";
 import { useNavigate } from "react-router-dom";
 import DynamicFormDialog from "./Formdialog";
 import { supabase } from "./store/index"; // Import supabase client
-import { fetchBanks, fetchBranchByBank } from "./store/bills";
-import MaintenanceBanner from "./components/Maintenence";
+// import { fetchBanks, fetchBranchByBank } from "./store/useBillStore";
+import MaintenanceBanner from "./components/Banners";
+import Header from "./Header";
 const makeStyles = (styles) => () => styles;
 
 const Paper = ({ children, style, elevation = 1 }) => (
@@ -57,6 +58,7 @@ const useStyles = makeStyles({
 });
 
 const Valuations = () => {
+    const { fetchValuations, fetchBanks, fetchBranchByBank, fetchPeople } = useValuationsStore();
     const [values, setValues] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
@@ -172,7 +174,6 @@ const Valuations = () => {
         }
     }
     const handleSubmit = async (data) => {
-        console.log('Form submitted with data:', data);
         const { status, message } = await supabase.from('valuations').insert([{
             valuation_key: data.id,
             address: data.address,
@@ -194,7 +195,6 @@ const Valuations = () => {
         setOpenDialog(false);
     }
     const handleBankChange = async (key, value) => {
-        console.log('Bank changed:', key, value);
         if (key === 'bank') {
             const branchOptions = await fetchBranchByBank(value.id);
             setFields(prevFields => prevFields.map(field =>
@@ -209,13 +209,18 @@ const Valuations = () => {
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
                     <Navigation selectedItem="Valuations" />
                     {!isLoading ? <Box style={classes.content}>
-                        <Box style={classes.header}>
-                            <Typography variant="h4" style={{ fontWeight: 600 }}>
-                                Valuations
-                            </Typography>
-                            <Button onClick={() => { handleLogOut() }} variant="contained">Log Out</Button>
-                        </Box>
-                        <MaintenanceBanner />
+                        <Header name="Valuations" />
+                        <MaintenanceBanner
+                            bannerArray={[
+                                {
+                                    variant: 'maintenance',
+                                    title: 'Maintenance Mode',
+                                    subtitle: 'This page is still under development. The data shown here is for demonstration purposes only.',
+                                    rotate: true,
+                                    duration: 10000
+                                }
+                            ]}
+                        />
 
                         <Box style={{ display: 'flex', flexDirection: 'row-reverse', marginBottom: '24px' }}>
                             <Button variant="contained"

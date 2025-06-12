@@ -11,8 +11,8 @@ const useDownloadReport = () => {
         const { status, branch, bank } = rows || {};
         const unpaidRows = data?.filter(row =>
             (status !== "" ? row.status === status : true) &&
-            (branch !== "" ? row.branch === branch : true) &&
-            (bank !== "" ? row.bank === bank : true)
+            (branch.name !== "" ? row.branch === branch.name : true) &&
+            (bank.name !== "" ? row.bank === bank.name : true)
         );
 
         const doc = new jsPDF();

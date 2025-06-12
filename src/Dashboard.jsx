@@ -4,6 +4,7 @@ import { Typography } from './components/Typography';
 import { Avatar } from "@mui/material";
 import Lottie from 'lottie-react';
 import emptyData from './assets/empty.json';
+import Header from "./Header"; // Adjust path as needed
 const makeStyles = (styles) => () => styles;
 const Paper = ({ children, style, elevation = 1 }) => (
     <div style={{
@@ -48,12 +49,7 @@ const Dashboard = () => {
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
                     <Navigation selectedItem="Dashboard" />
                     <Box style={classes.content}>
-                        <Box style={classes.header}>
-                            <Typography variant="h4" style={{ fontWeight: 600 }}>
-                                Dashboard
-                            </Typography>
-                            <Avatar />
-                        </Box>
+                        <Header name="Dashboard" />
 
 
                     </Box>

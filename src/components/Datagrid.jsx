@@ -59,7 +59,7 @@ function CustomLoadingOverlay() {
 export default function DataTable({ rows, columns, loadData, loading }) {
     // Add custom renderCell for status column
     const updatedColumns = columns.map((col) => {
-        if (col.field === 'status') {
+        if (col.type === 'chip') {
             return {
                 ...col,
                 renderCell: (params) => {
@@ -79,8 +79,21 @@ export default function DataTable({ rows, columns, loadData, loading }) {
                 },
             };
         }
-        return col;
-    });
+        else if (col.dataType === 'object') {
+            return {
+                ...col,
+                renderCell: (params) => {
+                    const value = params.value;
+                    return (
+                        value.name
+                    );
+                },
+            };
+        }
+        else {
+            return col;
+        }
+    })
 
     return (
         <Box>
