@@ -4,20 +4,21 @@ import { Typography } from './components/Typography';
 import Button from './components/Button';
 import Datagrid from './components/Datagrid';
 import { Avatar } from "@mui/material";
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import useValuationsStore from "./store/useValuationStore";
 import Lottie from 'lottie-react';
 import loaderData from './assets/loader.json';
 import { valuationFields } from "./constants/bankData";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import DynamicFormDialog from "./components/Formdialog";
 import { supabase } from "./store/index"; // Import supabase client
-// import { fetchBanks, fetchBranchByBank } from "./store/useBillStore";
 import MaintenanceBanner from "./components/Banners";
 import Header from "./Header";
 import useBillStore from "./store/useBillStore";
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 const makeStyles = (styles) => () => styles;
 
 const Paper = ({ children, style, elevation = 1 }) => (
@@ -59,47 +60,46 @@ const useStyles = makeStyles({
 });
 
 const Valuations = () => {
-    const { fetchValuations, fetchPeople } = useValuationsStore();
-    const { fetchBanks, fetchBranchByBank } = useBillStore(); // Import the store functions
-    const [values, setValues] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { fetchValuations, fetchPeople, valuations, people, insertValuation, updateValuation } = useValuationsStore();
+    const { fetchBanks, fetchBranchByBank, banks, loading } = useBillStore(); // Import the store functions
+    const [values, setValues] = useState(valuations);
+    const [isLoading, setIsLoading] = useState(loading);
     const [openDialog, setOpenDialog] = useState(false);
-    const [fields, setFields] = useState(valuationFields);
-    const [bankOptions, setBankOptions] = useState([]); // State to hold bank options
+    const [fields, setFields] = useState([]);
+    const [title, setTitle] = useState("");
 
-    const [title, setTitle] = useState('');
     const [saveButtonText, setSaveButtonText] = useState('Save');
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState({ key: '', text: '' });
-    const [people, setPeople] = useState([]);
     const navigate = useNavigate(); // Import useNavigate from react-router-dom
     const [formData, setFormData] = useState({
         id: '',
         address: '',
-        bank: '',
-        branch: '',
-        valuation_contact: '',
-        site_investigator: '',
-        documented_by: '',
+        bank: { id: '', name: '' },
+        branch: { id: '', name: '' },
+        valuation_contact: { id: '', name: '' },
+        site_investigator: { id: '', name: '' },
+        documented_by: { id: '', name: '' },
         status: '',
         comments: '',
         date: new Date().toISOString().split('T')[0] // Default to today's date
     });
 
     const columns = [
-        { field: 'id', headerName: 'Valuation Number', width: 90 },
-        { field: 'address', headerName: 'Property Details', width: 200 },
-        { field: 'bank', headerName: 'Bank', width: 120 },
-        { field: 'branch', headerName: 'Branch', width: 150 },
-        { field: 'valuation_contact', headerName: 'Valuation Contact', width: 150 },
-        { field: 'site_investigator', headerName: 'Site Investigator', width: 150 },
-        { field: 'documented_by', headerName: 'Documented By', width: 180 },
-        { field: 'status', headerName: 'Status', width: 140 },
-        { field: 'comments', headerName: 'Comments', width: 200 },
+        { field: 'id', headerName: 'Valuation Number', width: 90, dataType: 'string' },
+        { field: 'address', headerName: 'Property Details', width: 200, dataType: 'string' },
+        { field: 'bank', headerName: 'Bank', width: 120, dataType: 'object' },
+        { field: 'branch', headerName: 'Branch', width: 150, dataType: 'object' },
+        { field: 'valuation_contact', headerName: 'Valuation Contact', width: 150, dataType: 'object' },
+        { field: 'site_investigator', headerName: 'Site Investigator', width: 150, dataType: 'object' },
+        { field: 'documented_by', headerName: 'Documented By', width: 180, dataType: 'object' },
+        { field: 'status', headerName: 'Status', width: 140, dataType: 'string' },
+        { field: 'comments', headerName: 'Comments', width: 200, dataType: 'string' },
         {
             field: 'actions',
             headerName: 'Edit',
             width: 100,
+            dataType: 'string',
             renderCell: (params) => (
                 <IconButton onClick={() => handleEditClick(params.row)}>
                     <EditIcon />
@@ -111,41 +111,75 @@ const Valuations = () => {
     const fetchAndSetValuations = async () => {
         setIsLoading(true);
         const response = await fetchValuations();
-        if (response.status === 'success') {
+        if (response.data) {
             setValues(response.data);
-        } else {
-            console.error('Error fetching valuations:', response.message);
         }
         setIsLoading(false);
     }
     useEffect(() => {
-        fetchAndSetValuations();
-        fetchAndSettlePeople();
-        fetchAndSetBanks();
+        const initializeData = async () => {
+            // First set the base fields
+            setFields(valuationFields);
 
-    }, [])
+            // Then fetch and update with options
+            if (valuations.length === 0) {
+                await fetchAndSetValuations();
+            }
+            if (people.length === 0) {
+                await fetchAndSettlePeople();
+            }
+            if (banks.length === 0) {
+                await fetchAndSetBanks();
+            }
+        };
+
+        initializeData();
+    }, []);
 
     const fetchAndSettlePeople = async () => {
         const response = await fetchPeople();
-        if (response.status === 'success') {
-            setPeople(response.data);
-            // Update fields with fetched people data
+        if (response.data)
             setFields(prevFields => prevFields.map(field => {
                 if (['valuation_contact', 'site_investigator', 'documented_by'].includes(field.id)) {
                     return {
                         ...field,
-                        options: response.data.map(person => ({ id: person.id, name: person.name }))
+                        options: response.data
                     };
                 }
                 return field;
             }));
-        } else {
-            console.error('Error fetching people:', response.message);
-        }
     }
+
+    const handleEditClick = async (row) => {
+        setIsLoading(true)
+        setTitle("Edit Valuation")
+        setFormData({
+            id: row.id,
+            address: row.address,
+            bank: row.bank,
+            branch: row.branch,
+            valuation_contact: row.valuation_contact,
+            site_investigator: row.site_investigator,
+            documented_by: row.documented_by,
+            status: row.status,
+            comments: row.comments,
+            date: new Date().toISOString().split('T')[0]
+        });
+        const branches = await fetchBranchByBank(row.bank.id);
+        setFields(prevFields =>
+            prevFields.map(field =>
+                field.name === 'branch'
+                    ? { ...field, options: branches.data }
+                    : { ...field }
+            )
+        );
+        setSaveButtonText('Save');
+        setOpenDialog(true);
+        setIsLoading(false)
+    };
     const fetchAndSetBanks = async () => {
         const response = await fetchBanks();
-        if (response.status === 'success') {
+        if (response.data) {
             setFields(prevFields => prevFields.map(field => {
                 if (field.id === 'bank') {
                     return {
@@ -155,62 +189,102 @@ const Valuations = () => {
                 }
                 return field;
             }));
-            setBankOptions(response.data); // Set bank options for autocomplete
-        }
-        else {
-            console.error('Error fetching banks:', response.message);
         }
     }
     const handleNewValuation = async () => {
-        setTitle('Add New Valuation');
+        setTitle("Add New Valuation")
         setSaveButtonText('Save');
         setOpenDialog(true);
 
     }
-    const handleLogOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Error logging out:', error.message);
-        } else {
-            navigate('/login') // Redirect to login page
-        }
-    }
+
     const handleSubmit = async (data) => {
-        const { status, message } = await supabase.from('valuations').insert([{
-            valuation_key: data.id,
+        setIsLoading(true);
+        let bankId, branchId, valuation_contact, site_investigator, documented_by;
+
+        // Insert bank if it's a string
+        if (typeof data.bank === 'string' && data.bank !== '') {
+            const response = await insertBank(data.bank);
+            bankId = response.data[0].id;
+        } else {
+            bankId = data.bank.id;
+        }
+
+        // Insert branch if it's a string
+        if (typeof data.branch === 'string' && data.branch !== '') {
+            const response = await insertBranch(data.branch, bankId ?? data.bank.id);
+            branchId = response.data[0].id;
+        } else {
+            branchId = data.branch.id || data.branch;
+        }
+
+        // Insert valuation contact if it's a string
+        if (typeof data.valuation_contact === 'string' && data.valuation_contact !== '') {
+            const response = await insertEmployee(data.valuation_contact);
+            valuation_contact = response.data[0].id;
+        } else {
+            valuation_contact = data.valuation_contact.id || data.valuation_contact;
+        }
+
+        // Insert site investigator if it's a string
+        if (typeof data.site_investigator === 'string' && data.site_investigator !== '') {
+            const response = await insertEmployee(data.site_investigator);
+            site_investigator = response.data[0].id;
+        } else {
+            site_investigator = data.site_investigator.id || data.site_investigator;
+        }
+
+        // Insert documented by if it's a string
+        if (typeof data.documented_by === 'string' && data.documented_by !== '') {
+            const response = await insertEmployee(data.documented_by);
+            documented_by = response.data[0].id;
+        } else {
+            documented_by = data.documented_by.id || data.documented_by;
+        }
+
+
+        const newBill = {
+            valuation_key: parseInt(data.id, 10),
             address: data.address,
-            bank_id: data.bank,
-            branch_id: data.branch,
-            valuation_contact_id: data.valuation_contact,
-            site_investigator_id: data.site_investigator,
-            documented_by_id: data.documented_by,
+            bank_id: bankId,
+            branch_id: branchId,
+            valuation_contact_id: valuation_contact,
+            site_investigator_id: site_investigator,
+            documented_by_id: documented_by,
             status: data.status,
             comments: data.comments
-        }]);
-        if (status === 'success') {
-            setMessage({ key: 'success', text: 'Valuation added successfully!' });
-            fetchAndSetValuations();
-        } else {
-            setMessage({ key: 'error', text: message });
+        };
+        const id = parseInt(data.id, 10);
+        if (title === "Edit Valuation") {
+            await updateValuation(id, newBill);
         }
+        else {
+            await insertValuation(parseInt(data.id, 10), newBill);
+
+        }
+        await fetchAndSetValuations();
         setIsLoading(false);
         setOpenDialog(false);
-    }
+        await fetchBanks();
+
+    };
     const handleBankChange = async (key, value) => {
-        if (key === 'bank') {
-            const branchOptions = await fetchBranchByBank(value.id);
+        if ((key === 'bank' && value?.id)) {
+            setIsLoading(true);
+            const branches = await fetchBranchByBank(value?.id);
             setFields(prevFields => prevFields.map(field =>
-                field.name === 'branch' ? { ...field, options: branchOptions.data } : field
+                field.name === 'branch' ? { ...field, options: branches.data } : field
             ));
+            setIsLoading(false);
         }
-    }
+    };
 
     return (
         <Box style={classes.mainContainer}>
             <Paper style={classes.paper}>
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
                     <Navigation selectedItem="Valuations" />
-                    {!isLoading ? <Box style={classes.content}>
+                    <Box style={classes.content}>
                         <Header name="Valuations" />
                         <MaintenanceBanner
                             bannerArray={[
@@ -238,15 +312,8 @@ const Valuations = () => {
                                 loading={isLoading}
                                 loadData={fetchAndSetValuations}
                             />
-
                         </Paper>
-
-                    </Box> :
-                        <div style={{ margin: 'auto', width: '250px', height: '250px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                            <Lottie animationData={loaderData} loop={true} />
-                        </div>}
-
-
+                    </Box>
                 </Box>
 
             </Paper>
@@ -256,11 +323,11 @@ const Valuations = () => {
                     setFormData({
                         id: '',
                         address: '',
-                        bank: '',
-                        branch: '',
-                        valuation_contact: '',
-                        site_investigator: '',
-                        documented_by: '',
+                        bank: { id: '', name: '' },
+                        branch: { id: '', name: '' },
+                        valuation_contact: { id: '', name: '' },
+                        site_investigator: { id: '', name: '' },
+                        documented_by: { id: '', name: '' },
                         status: '',
                         comments: '',
                         date: new Date().toISOString().split('T')[0]
@@ -278,6 +345,12 @@ const Valuations = () => {
                 disabledKey={'branch'}
                 disabledReference={'bank'}
             />
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 999 }}
+                open={isLoading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </Box>
     )
 }

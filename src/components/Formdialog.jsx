@@ -25,11 +25,21 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
 
     const handleChange = (key) => (e) => {
         const value = e.target.value;
-        setFormData((prev) => ({ ...prev, [key.id]: typeof value === 'string' ? value.toUpperCase() : value }));
+        if (key === 'bank' || key === 'branch') {
+            setFormData({ ...formData, [key]: value.toUpperCase() });
+        }
+        else {
+            setFormData((prev) => ({ ...prev, [key]: value }));
+        }
     };
 
     const handleAutocompleteChange = (key) => (e, value) => {
-        setFormData((prev) => ({ ...prev, [key.id]: typeof value === 'string' ? value.toUpperCase() : value }));
+        if (key === 'bank' || key === 'branch') {
+            setFormData({ ...formData, [key.id]: typeof (value) === 'string' ? value.toUpperCase() : value });
+        }
+        else {
+            setFormData((prev) => ({ ...prev, [key.id]: value }));
+        }
         onComponentChange?.(key.id, value);
     };
 
@@ -37,7 +47,6 @@ const DynamicFormDialog = ({ open, onClose, formFields, onSubmit, title = "Add N
         onSubmit(formData);
         onClose();
     };
-
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionComponent={Fade}
