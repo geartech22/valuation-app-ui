@@ -59,7 +59,10 @@ const Header = ({ name }) => {
                     <Avatar
                         src={userDetails?.profile_image}
                         alt={userDetails?.name}
-                        sx={{ width: 50, height: 50, cursor: 'pointer' }}
+                        sx={{
+                            width: 50, height: 50, cursor: 'pointer', transition: 'transform 0.2s ease-in-out',
+                            '&:hover': { transform: 'scale(1.1)' }
+                        }}
                         onClick={handleMenuOpen}
                     />
                 </Badge>
