@@ -37,7 +37,6 @@ const useStyles = makeStyles({
 
     },
     paper: {
-        borderRadius: '16px',
         overflow: 'hidden',
     },
     content: {

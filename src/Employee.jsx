@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Card,
     CardContent,
@@ -8,19 +8,15 @@ import {
     Paper,
 } from '@mui/material';
 import Navigation from './components/Navigation'; // Adjust path as needed
-import DownloadIcon from '@mui/icons-material/Download';
 import Button from './components/Button';// Adjust if you use a different icon
 import MaintenanceBanner from './components/Banners';
 import { Typography } from './components/Typography';
-import Header from './Header'; // Adjust path as needed
+import Header from './Header';
+import useValuationsStore from './store/useValuationStore';// Adjust path as needed
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
-// Dummy handlers and variables for demonstration
-
-const isLoading = false;
-const handleLogOut = () => { };
-const handleDownload = () => { };
-const handleNewBill = () => { };
 const makeStyles = (styles) => () => styles;
 const useStyles = makeStyles({
 
@@ -29,7 +25,6 @@ const useStyles = makeStyles({
 
     },
     paper: {
-        borderRadius: '16px',
         overflow: 'hidden',
     },
     content: {
@@ -47,40 +42,40 @@ const useStyles = makeStyles({
         gap: '16px'
     },
 });
-const employees = [
-    {
-        name: 'Anil Kumar',
-        title: 'Valuation Contractor',
-        dob: 'Jun 5, 1978',
-        id: 'VK1001',
-        department: 'Valuations',
-        photo: '/images/anil.jpg',
-    },
-    {
-        name: 'Meera Nair',
-        title: 'Site Investigator',
-        dob: 'Mar 20, 1985',
-        id: 'VK1002',
-        department: 'Valuations',
-        photo: '/images/meera.jpg',
-    },
-    {
-        name: 'Deepa Menon',
-        title: 'Billing Specialist',
-        dob: 'Dec 15, 1989',
-        id: 'VK1005',
-        department: 'Bills',
-        photo: '/images/deepa.jpg',
-    },
-    {
-        name: 'Rahul Verma',
-        title: 'HR Manager',
-        dob: 'May 11, 1980',
-        id: 'VK1007',
-        department: 'Human Resources',
-        photo: '/images/rahul.jpg',
-    },
-];
+// const employees = [
+//     {
+//         name: 'Anil Kumar',
+//         title: 'Valuation Contractor',
+//         dob: 'Jun 5, 1978',
+//         id: 'VK1001',
+//         department: 'Valuations',
+//         photo: '/images/anil.jpg',
+//     },
+//     {
+//         name: 'Meera Nair',
+//         title: 'Site Investigator',
+//         dob: 'Mar 20, 1985',
+//         id: 'VK1002',
+//         department: 'Valuations',
+//         photo: '/images/meera.jpg',
+//     },
+//     {
+//         name: 'Deepa Menon',
+//         title: 'Billing Specialist',
+//         dob: 'Dec 15, 1989',
+//         id: 'VK1005',
+//         department: 'Bills',
+//         photo: '/images/deepa.jpg',
+//     },
+//     {
+//         name: 'Rahul Verma',
+//         title: 'HR Manager',
+//         dob: 'May 11, 1980',
+//         id: 'VK1007',
+//         department: 'Human Resources',
+//         photo: '/images/rahul.jpg',
+//     },
+// ];
 
 const EmployeeCard = ({ employee }) => (
     <Card sx={{
@@ -100,7 +95,6 @@ const EmployeeCard = ({ employee }) => (
         }
     }}>
         <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            {/* Header section with clean background */}
             <Box
                 sx={{
                     backgroundColor: '#f8f9fa',
@@ -115,7 +109,7 @@ const EmployeeCard = ({ employee }) => (
                 <Avatar
                     variant='circular'
                     alt={employee.name}
-                    src={employee.photo}
+                    src={employee.profile_image}
                     sx={{
                         width: 100,
                         height: 100,
@@ -126,12 +120,10 @@ const EmployeeCard = ({ employee }) => (
                         fontWeight: 600
                     }}
                 >
-                    {employee.name.split(' ').map(n => n[0]).join('')}
                 </Avatar>
                 <Typography
                     variant="h6"
                     fontWeight="600"
-                    textAlign="center"
                     sx={{
                         fontSize: '1.1rem',
                         lineHeight: 1.3,
@@ -150,11 +142,10 @@ const EmployeeCard = ({ employee }) => (
                         fontWeight: 500
                     }}
                 >
-                    {employee.title}
+                    {employee.role}
                 </Typography>
             </Box>
 
-            {/* Details section */}
             <Box sx={{ p: 2, flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <Box>
                     <Typography
@@ -212,12 +203,26 @@ const EmployeeCard = ({ employee }) => (
 
 const EmployeeGrid = () => {
     const classes = useStyles();
+    const { people, fetchPeople } = useValuationsStore();
+    const [isLoading, setIsLoading] = useState(false);
+    const fetchAndSettlePeople = async () => {
+        await fetchPeople();
+        setIsLoading(false);
+    }
+    useEffect(() => {
+
+        if (people.length === 0) {
+            setIsLoading(true);
+            fetchAndSettlePeople();
+        }
+    }, []);
+
+    console.log(people)
     return (
         <Box style={classes.mainContainer}>
             <Paper style={classes.paper}>
                 <Box style={{ display: 'flex', minHeight: '100vh' }}>
                     <Navigation selectedItem='Employees' />
-                    {!isLoading ? (
                         <Box style={classes.content}>
                             <Header name="Employees" />
                             <MaintenanceBanner
@@ -236,22 +241,27 @@ const EmployeeGrid = () => {
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    onClick={handleNewBill}
+                                // onClick={handleNewBill}
                                 >
                                     Add New Employee +
                                 </Button>
                             </Box>
                             <Grid container spacing={3} justifyContent="flex-start">
-                                {employees.map((emp, index) => (
+                            {people?.map((emp, index) => (
                                     <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
                                         <EmployeeCard employee={emp} />
                                     </Grid>
                                 ))}
                             </Grid>
-                        </Box>
-                    ) : null}
+                    </Box>
                 </Box>
             </Paper>
+            <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 999 }}
+                open={isLoading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </Box>
     )
 }

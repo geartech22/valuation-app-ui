@@ -149,7 +149,8 @@ export default function DataTable({ rows, columns, loadData, loading }) {
                         fontSize: 14,
                     },
                     '& .MuiDataGrid-row:hover': {
-                        backgroundColor: '#f3f4f6',
+                        backgroundColor: ' #f1f5f9',
+                        cursor: 'pointer',
                     },
                     '& .MuiDataGrid-footerContainer': {
                         backgroundColor: '#f9fafb',

@@ -106,7 +106,7 @@ const useValuationsStore = create((set) => ({
     fetchPeople: async () => {
         const { data, error } = await supabase
             .from('people')
-            .select('id, name, role');
+            .select('id, name, role, profile_image').order('created_at', { ascending: false });
 
         if (error) {
             set({ people: [], error: error.message, loading: false });
