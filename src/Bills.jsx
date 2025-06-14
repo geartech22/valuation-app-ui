@@ -220,8 +220,11 @@ export default function Bills() {
     };
 
     const handleEditClick = async (row) => {
+        const [day, month, year] = row.date.split('/');
+        const isoDate = `${year}-${month}-${day}`;
+        const date = new Date(isoDate);
         setFormData({
-            date: new Date(row.date).toISOString().split('T')[0],
+            date: date.toISOString().split('T')[0],
             id: parseInt(row.id, 10),
             address: row.address,
             bank: row.bank,
