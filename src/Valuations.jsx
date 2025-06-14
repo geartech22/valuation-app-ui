@@ -8,8 +8,6 @@ import { use, useEffect, useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import useValuationsStore from "./store/useValuationStore";
-import Lottie from 'lottie-react';
-import loaderData from './assets/loader.json';
 import { valuationFields } from "./constants/bankData";
 import { data, useNavigate } from "react-router-dom";
 import DynamicFormDialog from "./components/Formdialog";
@@ -19,6 +17,10 @@ import Header from "./Header";
 import useBillStore from "./store/useBillStore";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import { Alert, Snackbar } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+
+
 const makeStyles = (styles) => () => styles;
 
 const Paper = ({ children, style, elevation = 1 }) => (
@@ -60,18 +62,17 @@ const useStyles = makeStyles({
 });
 
 const Valuations = () => {
-    const { fetchValuations, fetchPeople, valuations, people, insertValuation, updateValuation } = useValuationsStore();
-    const { fetchBanks, fetchBranchByBank, banks, loading } = useBillStore(); // Import the store functions
+    const { fetchValuations, fetchPeople, valuations, people, insertValuation, updateValuation, insertPeopleByName } = useValuationsStore();
+    const { fetchBanks, fetchBranchByBank, banks, loading, insertBank, insertBranch } = useBillStore(); // Import the store functions
     const [values, setValues] = useState(valuations);
     const [isLoading, setIsLoading] = useState(loading);
     const [openDialog, setOpenDialog] = useState(false);
-    const [fields, setFields] = useState([]);
+    const [fields, setFields] = useState(valuationFields);
     const [title, setTitle] = useState("");
 
     const [saveButtonText, setSaveButtonText] = useState('Save');
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState({ key: '', text: '' });
-    const navigate = useNavigate(); // Import useNavigate from react-router-dom
     const [formData, setFormData] = useState({
         id: '',
         address: '',
@@ -88,12 +89,12 @@ const Valuations = () => {
     const columns = [
         { field: 'id', headerName: 'Valuation Number', width: 90, dataType: 'string' },
         { field: 'address', headerName: 'Property Details', width: 200, dataType: 'string' },
-        { field: 'bank', headerName: 'Bank', width: 120, dataType: 'object' },
-        { field: 'branch', headerName: 'Branch', width: 150, dataType: 'object' },
-        { field: 'valuation_contact', headerName: 'Valuation Contact', width: 150, dataType: 'object' },
-        { field: 'site_investigator', headerName: 'Site Investigator', width: 150, dataType: 'object' },
-        { field: 'documented_by', headerName: 'Documented By', width: 180, dataType: 'object' },
-        { field: 'status', headerName: 'Status', width: 140, dataType: 'string' },
+        { field: 'bank', headerName: 'Bank', width: 120, dataType: 'object', type: 'dropdown' },
+        { field: 'branch', headerName: 'Branch', width: 150, dataType: 'object', type: 'dropdown' },
+        { field: 'valuation_contact', headerName: 'Valuation Contact', width: 150, dataType: 'object', type: 'avatar' },
+        { field: 'site_investigator', headerName: 'Site Investigator', width: 150, dataType: 'object', type: 'avatar' },
+        { field: 'documented_by', headerName: 'Documented By', width: 150, dataType: 'object', type: 'avatar' },
+        { field: 'status', headerName: 'Status', width: 140, dataType: 'string', type: 'chip' },
         { field: 'comments', headerName: 'Comments', width: 200, dataType: 'string' },
         {
             field: 'actions',
@@ -109,34 +110,30 @@ const Valuations = () => {
     ];
     const classes = useStyles();
     const fetchAndSetValuations = async () => {
+        if (valuations && valuations?.length == 0) {
         setIsLoading(true);
         const response = await fetchValuations();
         if (response.data) {
             setValues(response.data);
         }
         setIsLoading(false);
+        }
+        else {
+            setValues(valuations);
+        }
     }
     useEffect(() => {
-        const initializeData = async () => {
-            // First set the base fields
-            setFields(valuationFields);
-
-            // Then fetch and update with options
-            if (valuations.length === 0) {
-                await fetchAndSetValuations();
-            }
-            if (people.length === 0) {
-                await fetchAndSettlePeople();
-            }
-            if (banks.length === 0) {
-                await fetchAndSetBanks();
-            }
-        };
-
-        initializeData();
+        fetchAndSetBanks();
+    }, [banks]);
+    useEffect(() => {
+        fetchAndSettlePeople();
+    }, [people]);
+    useEffect(() => {
+        fetchAndSetValuations();
     }, []);
 
     const fetchAndSettlePeople = async () => {
+        if (people?.length === 0) {
         const response = await fetchPeople();
         if (response.data)
             setFields(prevFields => prevFields.map(field => {
@@ -148,6 +145,19 @@ const Valuations = () => {
                 }
                 return field;
             }));
+        }
+        else {
+            setFields(prevFields => prevFields.map(field => {
+                if (['valuation_contact', 'site_investigator', 'documented_by'].includes(field.id)) {
+                    return {
+                        ...field,
+                        options: people
+                    };
+                }
+                return field;
+            }));
+
+        }
     }
 
     const handleEditClick = async (row) => {
@@ -178,13 +188,26 @@ const Valuations = () => {
         setIsLoading(false)
     };
     const fetchAndSetBanks = async () => {
-        const response = await fetchBanks();
-        if (response.data) {
+        if (banks?.length === 0) {
+            const response = await fetchBanks();
+            if (response.data) {
+                setFields(prevFields => prevFields.map(field => {
+                    if (field.id === 'bank') {
+                        return {
+                            ...field,
+                            options: response.data.map(bank => ({ id: bank.id, name: bank.name }))
+                        };
+                    }
+                    return field;
+                }));
+            }
+        }
+        else {
             setFields(prevFields => prevFields.map(field => {
                 if (field.id === 'bank') {
                     return {
                         ...field,
-                        options: response.data.map(bank => ({ id: bank.id, name: bank.name }))
+                        options: banks.map(bank => ({ id: bank.id, name: bank.name }))
                     };
                 }
                 return field;
@@ -220,7 +243,7 @@ const Valuations = () => {
 
         // Insert valuation contact if it's a string
         if (typeof data.valuation_contact === 'string' && data.valuation_contact !== '') {
-            const response = await insertEmployee(data.valuation_contact);
+            const response = await insertPeopleByName(data.valuation_contact);
             valuation_contact = response.data[0].id;
         } else {
             valuation_contact = data.valuation_contact.id || data.valuation_contact;
@@ -228,7 +251,7 @@ const Valuations = () => {
 
         // Insert site investigator if it's a string
         if (typeof data.site_investigator === 'string' && data.site_investigator !== '') {
-            const response = await insertEmployee(data.site_investigator);
+            const response = await insertPeopleByName(data.site_investigator);
             site_investigator = response.data[0].id;
         } else {
             site_investigator = data.site_investigator.id || data.site_investigator;
@@ -236,7 +259,7 @@ const Valuations = () => {
 
         // Insert documented by if it's a string
         if (typeof data.documented_by === 'string' && data.documented_by !== '') {
-            const response = await insertEmployee(data.documented_by);
+            const response = await insertPeopleByName(data.documented_by);
             documented_by = response.data[0].id;
         } else {
             documented_by = data.documented_by.id || data.documented_by;
@@ -259,14 +282,13 @@ const Valuations = () => {
             await updateValuation(id, newBill);
         }
         else {
-            await insertValuation(parseInt(data.id, 10), newBill);
+            await insertValuation(newBill);
 
         }
-        await fetchAndSetValuations();
+        setValues(valuations)
+        setOpen(true)
         setIsLoading(false);
         setOpenDialog(false);
-        await fetchBanks();
-
     };
     const handleBankChange = async (key, value) => {
         if ((key === 'bank' && value?.id)) {
@@ -307,12 +329,45 @@ const Valuations = () => {
                         <Paper elevation={0} style={{ border: '1px solid #e0e0e0', minWidth: '100%', width: '700px' }}>
 
                             <Datagrid
-                                rows={values}
+                                rows={valuations}
                                 columns={columns}
                                 loading={isLoading}
-                                loadData={fetchAndSetValuations}
+                                loadData={fetchValuations}
                             />
                         </Paper>
+                        <Snackbar
+                            open={open}
+                            autoHideDuration={5000}
+                            onClose={() => setOpen(false)}
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        >
+                            <Alert
+                                size="medium"
+                                severity={message?.key}
+                                sx={{
+                                    fontSize: '1.2rem',     // Increase text size
+                                    padding: '20px',        // Increase padding
+                                    alignItems: 'center',   // Vertically center content
+                                    '& .MuiAlert-icon': {
+                                        fontSize: '2rem'      // Make icon bigger
+                                    }
+                                }}
+
+                                onClose={() => setOpen(false)}
+                                action={
+                                    <IconButton
+                                        aria-label="close"
+                                        color="inherit"
+                                        size="small"
+                                        onClick={() => setOpen(false)}
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                }
+                            >
+                                {message?.text}
+                            </Alert>
+                        </Snackbar>
                     </Box>
                 </Box>
 

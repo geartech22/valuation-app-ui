@@ -27,15 +27,18 @@ const useValuationsStore = create((set) => ({
                 ),
                 valuation_contact:valuation_contact_id (
                     id,
-                    name
+                    name,
+                    profile_image
                 ),
                 site_investigator:site_investigator_id (
                     id,
-                    name
+                    name,
+                    profile_image
                 ),
                 documented_by:documented_by_id (
                     id,
-                    name
+                    name,
+                    profile_image
                 ),
                 status,
                 comments,
@@ -53,9 +56,9 @@ const useValuationsStore = create((set) => ({
             address: valuation.address,
             bank: { id: valuation.bank?.id || '', name: valuation.bank?.name || 'N/A' },
             branch: { id: valuation.branch?.id || '', name: valuation.branch?.branch_name || 'N/A' },
-            valuation_contact: { id: valuation.valuation_contact?.id || '', name: valuation.valuation_contact?.name || 'N/A' },
-            site_investigator: { id: valuation.site_investigator?.id || '', name: valuation.site_investigator?.name || 'N/A' },
-            documented_by: { id: valuation.documented_by?.id || '', name: valuation.documented_by?.name || 'N/A' },
+            valuation_contact: { id: valuation.valuation_contact?.id || '', name: valuation.valuation_contact?.name || 'N/A', image: valuation.valuation_contact?.profile_image || '' },
+            site_investigator: { id: valuation.site_investigator?.id || '', name: valuation.site_investigator?.name || 'N/A', image: valuation.site_investigator?.profile_image || '' },
+            documented_by: { id: valuation.documented_by?.id || '', name: valuation.documented_by?.name || 'N/A', image: valuation.documented_by?.profile_image || '' },
             status: valuation.status,
             comments: valuation.comments,
             created_at: new Date(valuation.created_at).toLocaleDateString('en-GB')
@@ -95,6 +98,7 @@ const useValuationsStore = create((set) => ({
         }
 
         await useValuationsStore.getState().fetchValuations();
+        // set({ loading: false, error: null, val });
         return { status: 'success', message: 'Valuation updated successfully', data, statusCode: 200 };
     },
 
@@ -112,21 +116,19 @@ const useValuationsStore = create((set) => ({
         set({ people: data, status: 'success', loading: false });
         return { status: 'success', message: 'People fetched successfully', data, statusCode: 200 };
     },
-    insertPeople: async (peopleData) => {
-        // complete the code\
+    insertPeopleByName: async (name) => {
         const { data, error } = await supabase
             .from('people')
-            .insert([peopleData])
-            .select();
+            .insert([{ name }])
+            .select('name');
 
         if (error) {
             set({ error: error.message });
             return { status: 'error', message: error.message, data: [], statusCode: error.code };
         }
-
+        const response = await useValuationsStore.getState().fetchPeople();
+        set({ people: response.data })
         return { status: 'success', message: 'Valuation inserted successfully', data, statusCode: 201 };
-
-
     }
 }));
 

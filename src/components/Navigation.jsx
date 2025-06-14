@@ -8,6 +8,7 @@ import WorkIcon from '@mui/icons-material/Work';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
 import Logo from "../assets/logo.png";
+import { useLoginStore } from '../store/useLoginStore';
 
 const makeStyles = (styles) => () => styles;
 const version = __APP_VERSION__;
@@ -115,6 +116,7 @@ const Navigation = ({ selectedItem }) => {
     const classes = useStyles();
     const [selectedMenuItem, setSelectedMenuItem] = useState(selectedItem);
     const navigate = useNavigate();
+    const { user } = useLoginStore();
     useEffect(() => {
         setSelectedMenuItem(selectedItem);
     }, [selectedItem]);
