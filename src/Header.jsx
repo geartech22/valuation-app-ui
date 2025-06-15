@@ -38,9 +38,8 @@ const Header = ({ name }) => {
         await logout();
         navigate('/login');
     };
-
     return (
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography variant="h4" fontWeight={600}>
                 {name}
             </Typography>

@@ -22,7 +22,6 @@ const makeStyles = (styles) => () => styles;
 const Paper = ({ children, style, elevation = 1 }) => (
     <div style={{
         backgroundColor: 'white',
-        borderRadius: '8px',
         boxShadow: elevation === 1 ? '0 2px 4px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.15)',
         ...style
     }}>
