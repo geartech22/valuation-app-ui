@@ -59,7 +59,7 @@ const useBillStore = create((set) => ({
             fee: bill.bill_amount,
             status: bill.status,
             comments: bill.comments,
-            updatedBy: { "name": bill.people.name, "id": bill.people.id, "image": bill.people.profile_image },
+            updatedBy: { "name": bill.people?.name, "id": bill.people?.id, "image": bill.people?.profile_image },
         }));
 
         set({ bills: formattedData, loading: false });
