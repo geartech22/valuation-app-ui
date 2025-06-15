@@ -35,6 +35,11 @@ const useBillStore = create((set) => ({
         branch:branch_id (
           id,
           branch_name
+        ),
+        people:user_id (
+          id,
+          name,
+          profile_image
         )
       `)
             .order('created_at', { ascending: false });
@@ -53,7 +58,8 @@ const useBillStore = create((set) => ({
             value: bill.property_value,
             fee: bill.bill_amount,
             status: bill.status,
-            comments: bill.comments
+            comments: bill.comments,
+            updatedBy: { "name": bill.people.name, "id": bill.people.id, "image": bill.people.profile_image },
         }));
 
         set({ bills: formattedData, loading: false });

@@ -37,7 +37,6 @@ const useStyles = makeStyles({
 
     },
     paper: {
-        borderRadius: '16px',
         overflow: 'hidden',
     },
     content: {
@@ -60,7 +59,7 @@ export default function Bills() {
 
     const { fetchBanks, fetchBills, fetchBranchByBank, insertBill, updateBill, bills, banks, branches, loading,
         error, entryFields, downloadFields, insertBank, insertBranch } = useBillStore(); // Use the custom hook to fetch banks and branches
-    const { user, authSession } = useLoginStore(); // Use the custom hook to get user information
+    const { user, authSession, getUser } = useLoginStore(); // Use the custom hook to get user information
     const classes = useStyles();
     const [openDialog, setOpenDialog] = useState(false);
     const [fields, setFields] = useState();
@@ -158,7 +157,8 @@ export default function Bills() {
                 status: data.status,
                 bank_id: data?.bank?.id ? data.bank.id : bankId,
                 branch_id: data?.branch?.id ? data.branch.id : branchId,
-                comments: data.comments || ''
+                comments: data.comments || '',
+                user_id: user ? user.id : ''
             };
             if (title === 'Edit Bill') {
                 await updateBill(data.id, newBill);
@@ -188,10 +188,11 @@ export default function Bills() {
 
     const columns = [
         { field: 'id', headerName: 'Bill No', width: 80, dataType: 'string' },
-        { field: 'date', headerName: 'Bill Date', width: 150, dataType: 'string' },
+        { field: 'updatedBy', headerName: 'Updated By', width: 150, dataType: 'string', dataType: 'object', type: 'avatar' },
+        { field: 'date', headerName: 'Bill Date', width: 100, dataType: 'string' },
         { field: 'address', headerName: 'Property Details', width: 300, dataType: 'string' },
         { field: 'bank', headerName: 'Bank', width: 100, dataType: 'object', type: 'dropdown' },
-        { field: 'branch', headerName: 'Branch', width: 250, dataType: 'object', type: 'dropdown' },
+        { field: 'branch', headerName: 'Branch', width: 200, dataType: 'object', type: 'dropdown' },
         { field: 'value', headerName: 'Property Value(₹)', width: 180, dataType: 'string' },
         { field: 'fee', headerName: 'Bill Amount(₹)', width: 130, dataType: 'string' },
         { field: 'status', headerName: 'Status', width: 120, dataType: 'string', type: 'chip' },
@@ -232,7 +233,8 @@ export default function Bills() {
             value: parseInt(row.value, 10),
             fee: parseInt(row.fee, 10),
             status: row.status,
-            comments: row.comments || ''
+            comments: row.comments || '',
+            user_id: user.id
         });
         setIsLoading(true);
         const branches = await fetchBranchByBank(row.bank.id);

@@ -6,6 +6,7 @@ export const useLoginStore = create((set) => ({
     user: null,
     isLoading: false,
     error: null,
+    userDetails: null,
 
     login: async (email, password) => {
         set({ isLoading: true, error: null });
@@ -48,5 +49,20 @@ export const useLoginStore = create((set) => ({
 
         set({ user: data.session?.user || null, isLoading: false, error: null });
         return { status: 'success', message: 'Session fetched successfully', data: data.session?.user || null };
-    }
+    },
+    fetchUserById: async (id) => {
+        const { data, error } = await supabase
+            .from('people')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            set({ isLoading: false, user: null, error: error.message });
+            return { status: 'error', message: error.message, data: null };
+        }
+
+        set({ userDetails: data, isLoading: false, error: null });
+        return { status: 'success', message: 'User fetched successfully', data };
+    },
 }));

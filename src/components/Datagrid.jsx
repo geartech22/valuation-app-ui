@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
-import { Box } from '@mui/material';
+import { Avatar, Box } from '@mui/material';
 
 // Import icons
 
@@ -16,6 +16,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import Button from './Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import { GridOverlay } from '@mui/x-data-grid';
+import { Typography } from './Typography';
 
 const paginationModel = { page: 0, pageSize: 10 };
 
@@ -67,7 +68,7 @@ export default function DataTable({ rows, columns, loadData, loading }) {
                     const status = statusColors[value] || {};
                     return (
                         <Chip
-                            label={value}
+                            label={value.name ? value.name : value}
                             color={status.color || 'default'}
                             icon={status.icon || null}
                             size="medium"
@@ -79,13 +80,28 @@ export default function DataTable({ rows, columns, loadData, loading }) {
                 },
             };
         }
-        else if (col.dataType === 'object') {
+        else if (col.type === 'dropdown') {
             return {
                 ...col,
                 renderCell: (params) => {
                     const value = params.value;
                     return (
-                        value.name
+                        value?.name ? value.name : value
+                    );
+                },
+            };
+        }
+        else if (col.type === 'avatar') {
+            return {
+                ...col,
+                renderCell: (params) => {
+                    const value = params.value;
+                    return (
+                        <Box display='flex' alignItems='center'>
+                            <Avatar src={value?.image} />
+                            &nbsp;&nbsp;
+                            {value?.name ? value.name : value}
+                        </Box>
                     );
                 },
             };
@@ -94,7 +110,6 @@ export default function DataTable({ rows, columns, loadData, loading }) {
             return col;
         }
     })
-
     return (
         <Box>
             <Box display="flex" sx={{ border: '' }} >
@@ -134,7 +149,8 @@ export default function DataTable({ rows, columns, loadData, loading }) {
                         fontSize: 14,
                     },
                     '& .MuiDataGrid-row:hover': {
-                        backgroundColor: '#f3f4f6',
+                        backgroundColor: ' #f1f5f9',
+                        cursor: 'pointer',
                     },
                     '& .MuiDataGrid-footerContainer': {
                         backgroundColor: '#f9fafb',

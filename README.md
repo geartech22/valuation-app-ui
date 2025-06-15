@@ -1,12 +1,52 @@
-# React + Vite
+# Valuation App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+The Valuation App is a web application designed to manage and streamline the valuation and billing processes. It provides features such as user authentication, employee management, bill and valuation tracking, and report generation in PDF format.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+- **User Authentication:** Secure login and session management using Supabase.
+- **Employee Management:** View and manage employee details.
+- **Billing Management:** Track, edit, and download bills.
+- **Valuation Management:** Handle valuations with ease.
+- **PDF Report Generation:** Generate and download reports in PDF format.
+- **Responsive Design:** Ensures usability across various devices.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Technologies Used
+
+- **React & React Router:** For building the user interface and routing.
+- **Material UI:** For UI components and styling.
+- **Supabase:** For backend database services and authentication.
+- **Zustand:** For state management.
+- **jsPDF & jsPDF-AutoTable:** For generating PDF reports.
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/valuation-app.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd valuation-app
+   ```
+
+3. Install the dependencies:
+   ```bash
+   npm install
+   ```
+
+4. Set up environment variables by creating a `.env` file in the root directory.
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+6. Open your browser and visit `http://localhost:3000` to use the app.
+
+## License
+
+This project is licensed under the MIT License.
