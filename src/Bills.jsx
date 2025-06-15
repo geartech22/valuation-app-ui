@@ -96,13 +96,26 @@ export default function Bills() {
         }
     }
     useEffect(() => {
-        checkSession();
-        if (bills.length === 0) {
-            fetchBills();
-        }
-        if (banks.length === 0) {
-            fetchBanks();
-        }
+        const initializeData = async () => {
+            setIsLoading(true);
+
+            try {
+                await checkSession();
+
+                if (bills.length === 0) {
+                await fetchBills();
+            }
+            if (banks.length === 0) {
+                await fetchBanks();
+            }
+            } catch (error) {
+                console.error('Error initializing data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        initializeData();
     }, []);
     useEffect(() => {
         if (title === 'Edit Bill' || title === 'Add New Bill') {
@@ -306,7 +319,7 @@ export default function Bills() {
                                 rows={bills}
                                 columns={columns}
                                 loadData={fetchBills}
-                                loading={loading}
+                                loading={isLoading}
                             />
 
                         </Paper>
